@@ -4,10 +4,13 @@ from GFMM import GFMM
 
 class TestGFMM(TestCase):
 
-    def test_constructor(self):
-        gfmm = GFMM(5)
-        self.assertEqual(gfmm.V.shape, (5, 0))
-        self.assertEqual(gfmm.W.shape, (5, 0))
+    def setUp(self):
+        self.gfmm = GFMM()
+
+    def test__initialize(self):
+        self.gfmm._initialize(5)
+        self.assertEqual(self.gfmm.V.shape, (5, 0))
+        self.assertEqual(self.gfmm.W.shape, (5, 0))
 
     def test_fit(self):
         self.fail()
