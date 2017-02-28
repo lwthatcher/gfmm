@@ -3,8 +3,9 @@ import numpy as np
 
 class GFMM:
 
-    def __init__(self):
-        pass
+    def __init__(self, n):
+        self.V = np.zeros((n, 0))
+        self.W = np.zeros((n, 0))
 
     def fit(self, X):
         pass
