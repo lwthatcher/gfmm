@@ -1,9 +1,10 @@
 import numpy as np
+import membership
 
 
 class GFMM:
 
-    def __init__(self):
+    def __init__(self, membership_func=membership.General):
         print('Hello GFMM')
         pass
 
