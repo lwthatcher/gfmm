@@ -4,11 +4,12 @@ import membership
 
 class GFMM:
 
-    def __init__(self, membership_func=membership.General):
+    def __init__(self, membership_func=membership.Classification):
         print('Hello GFMM')
         self.X_l = np.zeros((0, 0))
         self.X_u = np.zeros((0, 0))
         self.n = 0
+        self.mfunc = membership_func(self)
 
     def fit(self, X, Y):
         """
@@ -42,5 +43,5 @@ class GFMM:
         Initializes the V and W matrices
         :param n: the number of input dimensions
         """
-        self.V = np.zeros((n, 0))
-        self.W = np.zeros((n, 0))
+        self.V = np.zeros((n, 1))
+        self.W = np.zeros((n, 1))

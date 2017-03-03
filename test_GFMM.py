@@ -9,8 +9,11 @@ class TestGFMM(TestCase):
 
     def test__initialize(self):
         self.gfmm._initialize(5)
-        self.assertEqual(self.gfmm.V.shape, (5, 0))
-        self.assertEqual(self.gfmm.W.shape, (5, 0))
+        print(self.gfmm.V)
+        self.assertEqual(self.gfmm.V.shape, (5, 1))
+        self.assertEqual(self.gfmm.W.shape, (5, 1))
+
+        self.gfmm.mfunc([0, 0])
 
     def test_fit(self):
         self.fail()
