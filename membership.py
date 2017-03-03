@@ -1,4 +1,5 @@
 """Fuzzy Membership Functions for FMMs"""
+import numpy as np
 
 
 class FuzzyMembershipFunction:
