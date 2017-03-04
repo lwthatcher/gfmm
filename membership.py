@@ -56,9 +56,7 @@ class Classification(FuzzyMembershipFunction):
 
         wv = np.add(dw, dv)
         total = np.sum(wv, axis=0) * (1 / (2 * self.n))
-        print(dw)
-        print(dv)
-        print(total)
+        return total
 
 
 class Clustering(FuzzyMembershipFunction):

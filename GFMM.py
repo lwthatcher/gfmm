@@ -5,7 +5,6 @@ import membership
 class GFMM:
 
     def __init__(self, membership_func=membership.Classification):
-        print('Hello GFMM')
         self.X_l = np.zeros((0, 0))
         self.X_u = np.zeros((0, 0))
         self.n = 0
