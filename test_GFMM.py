@@ -13,8 +13,6 @@ class TestGFMM(TestCase):
         self.assertEqual(self.gfmm.V.shape, (5, 1))
         self.assertEqual(self.gfmm.W.shape, (5, 1))
 
-        self.gfmm.mfunc([0, 0])
-
     def test_fit(self):
         self.fail()
 
