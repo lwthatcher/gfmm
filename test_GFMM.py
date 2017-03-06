@@ -105,7 +105,25 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(self.gfmm.W, np.array([[.5, .7], [.5, .7]]))
 
     def test__overlap_test(self):
-        self.fail()
+        self.gfmm._initialize(self.X2)
+        # no initial overlap
+        d, l = self.gfmm._overlap_test()
+        self.assertEqual(d, -1)
+        # no overlap yet
+        Vc = np.array([[.1, .7], [.1, .7]])
+        Wc = np.array([[.5, .7], [.5, .7]])
+        self.gfmm.V = Vc
+        self.gfmm.W = Wc
+        d, l = self.gfmm._overlap_test()
+        self.assertEqual(d, -1)
+        # overlap
+        Vd = np.array([[.1, .4], [.1, .3]])
+        Wd = np.array([[.5, .7], [.5, .7]])
+        self.gfmm.V = Vd
+        self.gfmm.W = Wd
+        d, l = self.gfmm._overlap_test()
+        self.assertNotEqual(d, -1)
+        self.assertNotEqual(l, 0)
 
     def test__contraction(self):
         self.fail()

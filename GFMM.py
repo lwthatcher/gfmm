@@ -29,8 +29,8 @@ class GFMM:
             xu = self.X_u[h, :]
             d = Y[h]
             self._expansion(xl, xu, d)
-            self._overlap_test()
-            self._contraction()
+            Δ, l = self._overlap_test()
+            self._contraction(Δ, l)
 
     def predict(self, X):
         pass
@@ -48,9 +48,18 @@ class GFMM:
         pass
 
     def _overlap_test(self):
-        pass
+        """
+        Checks if any hyperboxes are overlapping, and if so which case it is.
+        If Δ = -1, then the contraction step can be skipped
+        :return: tuple (Δ, l)
+            Δ: the index of the overlapping dimension, returns -1 if no overlap
+            l: the overlap case where l ϵ {1, 2, 3, 4}
+        """
+        return -1, None
 
-    def _contraction(self):
+    def _contraction(self, Δ, l):
+        if Δ == -1:
+            return
         pass
 
     def _initialize(self, X):
