@@ -16,6 +16,7 @@ class TestGFMM(TestCase):
                    [[.7, .75], [.7, .75]],
                    [[.5, .55], [.5, .55]],
                    [[.4, .45], [.3, .35]]])
+    d2 = np.array([1, 2, 1, 2])
 
     # run before each
     def setUp(self):
@@ -54,19 +55,33 @@ class TestGFMM(TestCase):
         # initially none
         self.gfmm._initialize(self.X2)
         self.assertEqual(self.gfmm.num_hboxes, 0)
-        # add 1
+        # 1 hyperbox
         xl = np.array([.1, .1])
         xu = np.array([.15, .15])
         self.gfmm._add_hyperbox(xl, xu)
         self.assertEqual(self.gfmm.num_hboxes, 1)
         self.assertEqual(self.gfmm.V[0, 0], .1)
         self.assertEqual(self.gfmm.W[0, 0], .15)
+        self.assertEqual(self.gfmm.V.shape, (2, 1))
+        # 2 hyperboxes
+        xl = np.array([.7, .7])
+        xu = np.array([.75, .75])
+        self.gfmm._add_hyperbox(xl, xu)
+        self.assertEqual(self.gfmm.num_hboxes, 2)
+        self.assertEqual(self.gfmm.V[0, 1], .7)
+        self.assertEqual(self.gfmm.V.shape, (2, 2))
 
     def test_fit(self):
-        self.fail()
-
-    def test_predict(self):
-        self.fail()
+        Vf = np.array([[.1, .45],
+                       [.1, .3]])
+        Wf = np.array([[.45, .7],
+                       [.5, .7]])
+        self.gfmm.fit(self.X2, self.d2)
+        self.assertEqual(self.gfmm.V.shape, (2, 2))
+        self.assertEqual(self.gfmm.W.shape, (2, 2))
+        self.assertEqual(self.gfmm.num_hboxes, 2)
+        np.testing.assert_array_equal(self.gfmm.V, Vf)
+        np.testing.assert_array_equal(self.gfmm.W, Wf)
 
     def test__expansion(self):
         self.fail()

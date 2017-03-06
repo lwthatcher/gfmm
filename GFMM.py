@@ -10,6 +10,8 @@ class GFMM:
         self.n = 0
         self.num_hboxes = 0
         self.mfunc = membership_func(self)
+        self.ϴ = 0.1
+        self.φ = 0.9
 
     def fit(self, X, Y):
         """
@@ -19,14 +21,30 @@ class GFMM:
             Target Values
             note that d=0 corresponds to an unlabeled item
         """
-        # TODO: check to see if X is (X_l, X_u); otherwise default to assume they are the same
-
+        input_length = X.shape[0]
         self._initialize(X)
+
+        for h in range(input_length):
+            xl = self.X_l[h, :]
+            xu = self.X_u[h, :]
+            d = Y[h]
+            self._expansion(xl, xu, d)
+            self._overlap_test()
+            self._contraction()
 
     def predict(self, X):
         pass
 
-    def _expansion(self):
+    def _expansion(self, xl, xu, d):
+        """
+        Does the expansion step for the given input pattern.
+        :param xl: array-like, size=[n_features]
+            The min value for the h'th input pattern
+        :param xu: array-like, size=[n_features]
+            The max value for the h'th input pattern
+        :param d: the h'th label
+            d=0 means unlabeled
+        """
         pass
 
     def _overlap_test(self):
