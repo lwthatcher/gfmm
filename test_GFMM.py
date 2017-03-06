@@ -1,17 +1,56 @@
 from unittest import TestCase
 from GFMM import GFMM
+import numpy as np
 
 
 class TestGFMM(TestCase):
+    X1 = np.array([[1, 2, 3],
+                   [4, 5, 6],
+                   [7, 8, 9]])
+    X2 = np.array([[.1, .1],
+                   [.7, .7],
+                   [.5, .5],
+                   [.4, .3]])
+    X3 = np.array([[[.1, .15], [.1, .15]],
+                   [[.7, .75], [.7, .75]],
+                   [[.5, .55], [.5, .55]],
+                   [[.4, .45], [.3, .35]]])
 
     def setUp(self):
         self.gfmm = GFMM()
 
     def test__initialize(self):
-        self.gfmm._initialize(5)
-        print(self.gfmm.V)
-        self.assertEqual(self.gfmm.V.shape, (5, 1))
-        self.assertEqual(self.gfmm.W.shape, (5, 1))
+        # initially 0 dimensions and no hyperboxes
+        self.assertEqual(self.gfmm.n, 0)
+        self.assertEqual(self.gfmm.num_hboxes, 0)
+        # 3 dims, 3 examples
+        self.gfmm._initialize(self.X1)
+        self.assertEqual(self.gfmm.V.shape, (3, 0))
+        self.assertEqual(self.gfmm.W.shape, (3, 0))
+        self.assertEqual(self.gfmm.n, 3)
+        self.assertEqual(self.gfmm.num_hboxes, 0)
+        self.assertEqual(self.gfmm.X_l[0, 0], 1)
+        self.assertEqual(self.gfmm.X_u[0, 0], 1)
+        # 2 dims, 4 examples
+        self.gfmm._initialize(self.X2)
+        print("shape", self.X2.shape)
+        self.assertEqual(self.gfmm.V.shape, (2, 0))
+        self.assertEqual(self.gfmm.W.shape, (2, 0))
+        self.assertEqual(self.gfmm.n, 2)
+        self.assertEqual(self.gfmm.num_hboxes, 0)
+        self.assertEqual(self.gfmm.X_l[0, 0], .1)
+        self.assertEqual(self.gfmm.X_u[0, 0], .1)
+        # set with different min/max values
+
+        self.gfmm._initialize(self.X3)
+        print("shape", self.X3.shape)
+        print(self.gfmm.n)
+        self.assertEqual(self.gfmm.V.shape, (2, 0))
+        self.assertEqual(self.gfmm.W.shape, (2, 0))
+        self.assertEqual(self.gfmm.n, 2)
+        self.assertEqual(self.gfmm.num_hboxes, 0)
+        self.assertEqual(self.gfmm.X_l[0, 0], .1)
+        self.assertEqual(self.gfmm.X_u[0, 0], .15)
 
     def test_fit(self):
         self.fail()
