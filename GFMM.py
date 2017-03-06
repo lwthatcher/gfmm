@@ -64,12 +64,14 @@ class GFMM:
         """
         dV = np.zeros((self.n, self.num_hboxes+1))
         dV[:, :-1] = self.V
-        if xl:
+        if xl is not None:
             dV[:, -1] = xl
+        self.V = dV
 
         dW = np.zeros((self.n, self.num_hboxes+1))
         dW[:, :-1] = self.W
-        if xu:
+        if xu is not None:
             dW[:, -1] = xu
+        self.W = dW
 
         self.num_hboxes += 1
