@@ -122,8 +122,17 @@ class TestGFMM(TestCase):
         self.gfmm.V = Vd
         self.gfmm.W = Wd
         d, l = self.gfmm._overlap_test()
-        self.assertNotEqual(d, -1)
-        self.assertNotEqual(l, 0)
+        self.assertEqual(d, 0)
+        self.assertEqual(l, 2)
 
     def test__contraction(self):
-        self.fail()
+        self.gfmm._initialize(self.X2)
+        Vd = np.array([[.1, .4], [.1, .3]])
+        Wd = np.array([[.5, .7], [.5, .7]])
+        self.gfmm.V = Vd
+        self.gfmm.W = Wd
+        self.gfmm._contraction(0, 2)
+        Ve = np.array([[.1, .45], [.1, .3]])
+        We = np.array([[.45, .7], [.5, .7]])
+        np.testing.assert_array_equal(self.gfmm.V, Ve)
+        np.testing.assert_array_equal(self.gfmm.W, We)
