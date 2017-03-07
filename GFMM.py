@@ -41,6 +41,7 @@ class GFMM:
     def _expansion(self, xl, xu, d):
         """
         Does the expansion step for the given input pattern.
+        For consistency with notation, this is assumed to be the h'th input pattern.
         :param xl: array-like, size=[n_features]
             The min value for the h'th input pattern
         :param xu: array-like, size=[n_features]
@@ -48,7 +49,7 @@ class GFMM:
         :param d: the h'th label
             d=0 means unlabeled
         """
-        pass
+        degree = self.mfunc(xl, xu)
 
     def _overlap_test(self):
         """
@@ -89,8 +90,10 @@ class GFMM:
         """
         Add a new hyperbox and set its initial min and max value.
         This corresponds to adding a new column in both V and W.
-        :param xl: vector, The lower bound of the input vector to set as the initial min values.
-        :param xu: vector, The upper bound of the input vector to set as the initial max values.
+        :param xl: array-like, size = [n_dimensions]
+            The lower bound of the input vector to set as the initial min values.
+        :param xu: array-like, size = [n_dimensions]
+            The upper bound of the input vector to set as the initial max values.
         :param cls: int, The class of the new hyperbox
         """
         # add column to V

@@ -13,29 +13,28 @@ class FuzzyMembershipFunction:
         self.parent = parent
         self.gamma = gamma
 
-    def degree(self, a):
+    def degree(self, al, au):
         """
         Returns the degree-of-membership for a given hyperbox
-        :param a: The h'th input vector to consider
+        :param al: The min value of the h'th input vector to consider
+        :param au: The max value of the h'th input vector to consider
         :return: the degree of membership for all hyperboxes has for input Ah
         """
-        dw = a.reshape(len(a), 1) - self.W
-        dw[dw > 1] = 1  # min(1, a-w)
-        dw *= self.gamma
-        dw[dw < 0] = 0  # max(0, γ*min)
-        dw = 1 - dw
-        dw[dw < 0] = 0  # max(0, 1-max)
-
-        dv = self.V - a.reshape(len(a), 1)
-        dv[dv > 1] = 1  # min(1, v-a)
-        dv *= self.gamma
-        dv[dv < 0] = 0  # max(0, γ*min)
-        dv = 1 - dv
-        dv[dv < 0] = 0  # max(0, 1-max)
-
+        dw = au.reshape(len(au), 1) - self.W
+        dw = self._inner_maxmins(dw)
+        dv = self.V - al.reshape(len(al), 1)
+        dv = self._inner_maxmins(dv)
         wv = np.add(dw, dv)
         total = np.sum(wv, axis=0) * (1 / (2 * self.n))
         return total
+    
+    def _inner_maxmins(self, q):
+        q[q > 1] = 1  # min(1, q)
+        q *= self.gamma
+        q[q < 0] = 0  # max(0, γ*min(1,q))
+        q = 1 - q
+        q[q < 0] = 0  # max(0, 1-max(0, γ*min(1,q)))
+        return q
 
     def __call__(self, *args, **kwargs):
         return self.degree(*args)

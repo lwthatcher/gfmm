@@ -20,6 +20,6 @@ class TestMembershipFunctions(TestCase):
     def test_classification(self):
         f = membership.FuzzyMembershipFunction(self.mock_parent, gamma=1.6)
         a = np.array([2., 5.3, 10.2])
-        bj = f(a)
+        bj = f(a, a)
         expected = np.array([0.5, .58666667, 0.78, 0.5])
         np.testing.assert_array_almost_equal(bj, expected)
