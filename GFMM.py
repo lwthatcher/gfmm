@@ -4,11 +4,14 @@ import membership
 
 class GFMM:
 
-    def __init__(self, membership_func=membership.FuzzyMembershipFunction):
+    def __init__(self, membership_func=None):
+        if membership_func is None:
+            membership_func = membership.FuzzyMembershipFunction
         self.X_l = np.zeros((0, 0))
         self.X_u = np.zeros((0, 0))
         self.n = 0
         self.num_hboxes = 0
+        self.B_cls = []
         self.mfunc = membership_func(self)
         self.ϴ = 0.1
         self.φ = 0.9
@@ -82,23 +85,27 @@ class GFMM:
         self.V = np.zeros((self.n, 0))
         self.W = np.zeros((self.n, 0))
 
-    def _add_hyperbox(self, xl, xu):
+    def _add_hyperbox(self, xl, xu, cls):
         """
         Add a new hyperbox and set its initial min and max value.
         This corresponds to adding a new column in both V and W.
-        :param xl: The lower bound of the input vector to set as the initial min values.
-        :param xu: The upper bound of the input vector to set as the initial max values.
+        :param xl: vector, The lower bound of the input vector to set as the initial min values.
+        :param xu: vector, The upper bound of the input vector to set as the initial max values.
+        :param cls: int, The class of the new hyperbox
         """
+        # add column to V
         dV = np.zeros((self.n, self.num_hboxes+1))
         dV[:, :-1] = self.V
         if xl is not None:
             dV[:, -1] = xl
         self.V = dV
-
+        # add column to W
         dW = np.zeros((self.n, self.num_hboxes+1))
         dW[:, :-1] = self.W
         if xu is not None:
             dW[:, -1] = xu
         self.W = dW
-
+        # set class of new hyperbox
+        self.B_cls.append(cls)
+        # increment number-of-hyperboxes counter
         self.num_hboxes += 1

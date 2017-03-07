@@ -55,21 +55,26 @@ class TestGFMM(TestCase):
         # initially none
         self.gfmm._initialize(self.X2)
         self.assertEqual(self.gfmm.num_hboxes, 0)
+        self.assertEqual(len(self.gfmm.B_cls), 0)
         # 1 hyperbox
         xl = np.array([.1, .1])
         xu = np.array([.15, .15])
-        self.gfmm._add_hyperbox(xl, xu)
+        self.gfmm._add_hyperbox(xl, xu, 1)
         self.assertEqual(self.gfmm.num_hboxes, 1)
         self.assertEqual(self.gfmm.V[0, 0], .1)
         self.assertEqual(self.gfmm.W[0, 0], .15)
         self.assertEqual(self.gfmm.V.shape, (2, 1))
+        self.assertEqual(len(self.gfmm.B_cls), 1)
+        self.assertEqual(self.gfmm.B_cls[0], 1)
         # 2 hyperboxes
         xl = np.array([.7, .7])
         xu = np.array([.75, .75])
-        self.gfmm._add_hyperbox(xl, xu)
+        self.gfmm._add_hyperbox(xl, xu, 2)
         self.assertEqual(self.gfmm.num_hboxes, 2)
         self.assertEqual(self.gfmm.V[0, 1], .7)
         self.assertEqual(self.gfmm.V.shape, (2, 2))
+        self.assertEqual(len(self.gfmm.B_cls), 2)
+        self.assertEqual(self.gfmm.B_cls[1], 2)
 
     def test_fit(self):
         Vf = np.array([[.1, .45],
