@@ -117,7 +117,8 @@ class GFMM:
         # increment number-of-hyperboxes counter
         self.num_hboxes += 1
 
-    def _k_best(self, M, k):
+    @staticmethod
+    def _k_best(M, k):
         k = min(k, len(M))
         idx = np.argpartition(M, -k)[::-1]  # indices for first k which are top k, not necessarily in order
         s_idx = np.argsort(M[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx
