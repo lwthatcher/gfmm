@@ -5,16 +5,29 @@ import membership
 class GFMM:
 
     def __init__(self, membership_func=None):
+        """
+
+        :param membership_func:
+        """
+        # membership function
         if membership_func is None:
             membership_func = membership.FuzzyMembershipFunction
+        self.mfunc = membership_func(self)
+        # initial input min/max arrays
         self.X_l = np.zeros((0, 0))
         self.X_u = np.zeros((0, 0))
+        # number of dimensions
         self.n = 0
-        self.num_hboxes = 0
+        # number of hyperboxes
+        self.hboxes = 0
+        # classes of hyperboxes
         self.B_cls = []
-        self.mfunc = membership_func(self)
+        # max size of hyperboxes
         self.ϴ = 0.1
+        # speed of decrease of ϴ
         self.φ = 0.9
+        # K-nearest neighbors to retrieve for expansion
+        self.Kn = 10
 
     # region Public Methods
     def fit(self, X, Y):
@@ -52,11 +65,12 @@ class GFMM:
         :param d: the h'th label
             d=0 means unlabeled
         """
-        if self.num_hboxes == 0:
+        if self.hboxes == 0:
             self._add_hyperbox(xl, xu, d)
             return
         degree = self.mfunc(xl, xu)
-        print(degree)
+        k_idxs = self.k_best(degree, self.Kn)
+        print(degree[k_idxs])
 
     def _overlap_test(self):
         """
@@ -78,7 +92,9 @@ class GFMM:
     def _initialize(self, X):
         """
         Initializes internal values and matrices from the input matrix
-        :param X: the entire input data
+        This is typically called from the .fit( ) method
+        :param X: array-like, size=[n_samples, n_features]
+            The training data
         """
         # input matrices: Xl, Xu
         if len(X.shape) >= 3 and X.shape[2] >= 2:
@@ -90,7 +106,7 @@ class GFMM:
         # set num dimensions
         self.n = X.shape[1]
         # initially no hyperboxes
-        self.num_hboxes = 0
+        self.hboxes = 0
         # initialize hyperbox matrices
         self.V = np.zeros((self.n, 0))
         self.W = np.zeros((self.n, 0))
@@ -103,16 +119,17 @@ class GFMM:
             The lower bound of the input vector to set as the initial min values.
         :param xu: array-like, size = [n_dimensions]
             The upper bound of the input vector to set as the initial max values.
-        :param cls: int, The class of the new hyperbox
+        :param cls: int
+            The class of the new hyperbox
         """
         # add column to V
-        dV = np.zeros((self.n, self.num_hboxes+1))
+        dV = np.zeros((self.n, self.hboxes + 1))
         dV[:, :-1] = self.V
         if xl is not None:
             dV[:, -1] = xl
         self.V = dV
         # add column to W
-        dW = np.zeros((self.n, self.num_hboxes+1))
+        dW = np.zeros((self.n, self.hboxes + 1))
         dW[:, :-1] = self.W
         if xu is not None:
             dW[:, -1] = xu
@@ -120,7 +137,7 @@ class GFMM:
         # set class of new hyperbox
         self.B_cls.append(cls)
         # increment number-of-hyperboxes counter
-        self.num_hboxes += 1
+        self.hboxes += 1
 
     @staticmethod
     def k_best(d, k):
