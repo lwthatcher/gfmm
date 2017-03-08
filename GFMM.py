@@ -16,11 +16,12 @@ class GFMM:
         self.ϴ = 0.1
         self.φ = 0.9
 
+    # region Public Methods
     def fit(self, X, Y):
         """
         :param X: array-like, size=[n_samples, n_features]
             Training Data
-        :param Y: array, dtype=float64, size=[n_samples]
+        :param Y: array-like, dtype=float64, size=[n_samples]
             Target Values
             note that d=0 corresponds to an unlabeled item
         """
@@ -37,7 +38,9 @@ class GFMM:
 
     def predict(self, X):
         pass
+    # endregion
 
+    # region Pipeline
     def _expansion(self, xl, xu, d):
         """
         Does the expansion step for the given input pattern.
@@ -69,7 +72,9 @@ class GFMM:
         if Δ == -1:
             return
         pass
+    # endregion
 
+    # region Helper
     def _initialize(self, X):
         """
         Initializes internal values and matrices from the input matrix
@@ -117,9 +122,23 @@ class GFMM:
         # increment number-of-hyperboxes counter
         self.num_hboxes += 1
 
-    @staticmethod
-    def _k_best(M, k):
-        k = min(k, len(M))
-        idx = np.argpartition(M, -k)[::-1]  # indices for first k which are top k, not necessarily in order
-        s_idx = np.argsort(M[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx
-        return idx[s_idx]   # returns indices for top k, in sorted order
+    def _k_best(self, d, k):
+        """
+        Gets the indices for the k highest values from the specified array, in sorted order
+        :param d: array-like, size=[n_hyperboxes]
+            The degree array
+        :param k: int
+            The number of values to look for.
+        :return: array-like, size=[min(k, len(d))]
+            The k indices for the k highest values in d
+        """
+        k = min(k, len(d))
+        idx = np.argpartition(d, -k)[::-1]  # indices for first k which are top k, not necessarily in order
+        s_idx = np.argsort(d[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx
+        return idx[s_idx]  # returns indices for top k, in sorted order
+    # endregion
+
+
+
+
+
