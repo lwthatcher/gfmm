@@ -49,7 +49,11 @@ class GFMM:
         :param d: the h'th label
             d=0 means unlabeled
         """
+        if self.num_hboxes == 0:
+            self._add_hyperbox(xl, xu, d)
+            return
         degree = self.mfunc(xl, xu)
+        print(degree)
 
     def _overlap_test(self):
         """
