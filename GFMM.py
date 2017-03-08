@@ -74,7 +74,7 @@ class GFMM:
         pass
     # endregion
 
-    # region Helper
+    # region Helper Methods
     def _initialize(self, X):
         """
         Initializes internal values and matrices from the input matrix
@@ -122,7 +122,8 @@ class GFMM:
         # increment number-of-hyperboxes counter
         self.num_hboxes += 1
 
-    def _k_best(self, d, k):
+    @staticmethod
+    def k_best(d, k):
         """
         Gets the indices for the k highest values from the specified array, in sorted order
         :param d: array-like, size=[n_hyperboxes]
@@ -138,7 +139,6 @@ class GFMM:
         return idx[s_idx]  # returns indices for top k, in sorted order
     # endregion
 
-
-
-
-
+    if __name__ == "__main__":
+        print("GFMM coming soon")
+        pass
