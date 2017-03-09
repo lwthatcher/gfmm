@@ -72,10 +72,16 @@ class GFMM:
         degree = self.mfunc(xl, xu)
         # idx is an ordered list of indices corresponding to candidate hyperboxes to expand
         idx = self.k_best(degree, self.Kn)
-        # TODO: d == 0? -> expand
-        # TODO: valid-class check
-        # TODO: can-expand check
-        # TODO: otherwise, create new hyperbox
+        idx = self._can_expand(xl, xu, idx)
+        if d == 0:
+            self._expand(idx[0], xl, xu)
+        else:
+            idx = self._valid_class(idx, d)
+            if len(idx) > 0:
+                self._expand(idx[0], xl, xu)
+            else:
+                self._add_hyperbox(xl, xu, d)
+        # return = ?
 
     def _overlap_test(self):
         """
@@ -175,7 +181,7 @@ class GFMM:
         """
         k = min(k, len(d))
         if k == 1:
-            return np.argmax(d)
+            return np.array([np.argmax(d)])
         idx = np.argpartition(d, -k)[::-1]  # indices for first k which are top k, not necessarily in order
         s_idx = np.argsort(d[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx
         return idx[s_idx]  # returns indices for top k, in sorted order

@@ -108,6 +108,7 @@ class TestGFMM(TestCase):
 
     def test__expansion(self):
         self.gfmm._initialize(self.X2)
+        self.gfmm.ϴ = .4
         # first input
         self.gfmm._expansion(self.X2[0, :], self.X2[0, :], self.d2[0])
         self.assertEqual(self.gfmm.hboxes, 1)
@@ -134,7 +135,7 @@ class TestGFMM(TestCase):
         s.gfmm._expansion(s.a1, s.a1, 1)
         Vb = np.array([[.1, .55, .2, .3],
                        [.2, .2, .6, .53]])
-        Wb = np.array([[.4, .75, .25, 3],
+        Wb = np.array([[.4, .75, .25, .3],
                        [.5, .4, .7, .53]])
         self.assertEqual(s.gfmm.hboxes, 4)
         self.assertEqual(s.gfmm.V.shape, (2, 4))
@@ -199,6 +200,7 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(self.gfmm.W, We)
 
     def test__k_best(self):
+        # large list
         B = np.array([0.56107481,0.86329273,0.97936701,0.35803764,0.57650837,0.00782822,0.39214498,0.78773393,0.11900468,0.20468056, 0.55545065,0.53322588,0.8644637 ,0.73928695,0.35036804, 0.97295121,0.38587608,0.14557602,0.46625496,0.57082576, 0.90507391,0.71348483,0.97306754,0.34191463,0.08013307, 0.64183503,0.59941625,0.69198802,0.19599409,0.04848452, 0.06788202,0.57459323,0.12906092,0.11598434,0.66394427, 0.86173515,0.60943442,0.95808242,0.63095585,0.75520642, 0.4304246 ,0.68292622,0.22150663,0.97191045,0.40548108, 0.33391995,0.91687308,0.42245342,0.24562244,0.38428225, 0.83314525,0.43079164,0.29827926,0.67329566,0.2441916,0.9239678,0.53756163,0.03056051,0.27519125,0.19571112, 0.9574535 ,0.09105649,0.2649977 ,0.28807847,0.00957413, 0.41519489,0.047152,0.35971428,0.00921316,0.37833271,0.01505729,0.99262542,0.86774579,0.2119966,0.45947339,0.32850559,0.15212822,0.44581891,0.42037057,0.16470616, 0.89845261,0.76883223,0.65530583,0.64080171,0.28412596,0.97319349,0.43705441,0.43858264,0.83801105,0.34161406, 0.20119325,0.4895211,0.96748549,0.3362789,0.44988399,0.1799015,0.26523983,0.2015935,0.34865404,0.12577012])
         order = np.argsort(B)[::-1]
         k_best = GFMM.k_best(B, 10)
@@ -218,6 +220,14 @@ class TestGFMM(TestCase):
         s.gfmm.ϴ = .33
         idx = s.gfmm._can_expand(s.a1, s.a1, np.array([0, 2]))
         np.testing.assert_array_equal(idx, np.array([0, 2]))
+        # 1 result, with single index
+        s = self.CASE_STUDY_I
+        idx = s.gfmm._can_expand(s.a1, s.a1, np.array([2]))
+        np.testing.assert_array_equal(idx, np.array([2]))
+        # 0 results, with scalar index
+        s = self.CASE_STUDY_I
+        idx = s.gfmm._can_expand(s.a1, s.a1, np.array([0]))
+        self.assertEqual(len(idx), 0)
 
     def test__valid_class(self):
         s = self.CASE_STUDY_I
