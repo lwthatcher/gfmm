@@ -201,4 +201,5 @@ class TestGFMM(TestCase):
         self.gfmm.B_cls = [1, 2, 1]
         self.gfmm.ϴ = .3
         a1 = np.array([.3, .53])
-        self.gfmm._can_expand(a1, a1, [0, 2, 1])
+        r1 = self.gfmm._can_expand(a1, a1, np.array([0, 2, 1]))
+        np.testing.assert_array_equal(r1, np.array([2]))

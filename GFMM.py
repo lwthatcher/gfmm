@@ -148,10 +148,11 @@ class GFMM:
         pass
 
     def _can_expand(self, xl, xu, idx):
-        W_max = np.maximum(self.W, xu.reshape(len(xu), 1))
-        V_min = np.minimum(self.V, xl.reshape(len(xl), 1))
+        W_max = np.maximum(self.W[:, idx], xu.reshape(len(xu), 1))
+        V_min = np.minimum(self.V[:, idx], xl.reshape(len(xl), 1))
         dim_sizes = W_max - V_min
-        print("diff", dim_sizes)
+        result = np.all(dim_sizes <= self.ϴ, 0)
+        return idx[result]
 
 
     @staticmethod
