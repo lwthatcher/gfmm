@@ -109,6 +109,49 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(self.gfmm.V, np.array([[.1, .7], [.1, .7]]))
         np.testing.assert_array_equal(self.gfmm.W, np.array([[.5, .7], [.5, .7]]))
 
+    def test__expansion_Kn(self):
+        # ----- Kn == 3 -----
+        self.gfmm._initialize(self.X2)
+        self.gfmm.V = np.array([[.1, .55, .2],
+                                [.2, .2, .6]])
+        self.gfmm.W = np.array([[.4, .75, .25],
+                                [.5, .4, .7]])
+        self.gfmm.hboxes = 3
+        self.gfmm.Kn = 3
+        self.gfmm.B_cls = [1, 2, 1]
+        # input A1
+        a1 = np.array([.3, .53])
+        self.gfmm._expansion(a1, a1, 1)
+        Vb = np.array([[.1, .55, .2],
+                       [.2, .2, .53]])
+        Wb = np.array([[.4, .75, .3],
+                       [.5, .4, .7]])
+        self.assertEqual(self.gfmm.hboxes, 3)
+        self.assertEqual(self.gfmm.V.shape, (2, 3))
+        np.testing.assert_array_equal(self.gfmm.V, Vb)
+        np.testing.assert_array_equal(self.gfmm.W, Wb)
+
+        # ----- Kn == 1 -----
+        self.gfmm._initialize(self.X2)
+        self.gfmm.V = np.array([[.1, .55, .2],
+                                [.2, .2, .6]])
+        self.gfmm.W = np.array([[.4, .75, .25],
+                                [.5, .4, .7]])
+        self.gfmm.hboxes = 3
+        self.gfmm.Kn = 1
+        self.gfmm.B_cls = [1, 2, 1]
+        # input A1
+        a1 = np.array([.3, .53])
+        self.gfmm._expansion(a1, a1, 1)
+        Vb = np.array([[.1, .55, .2, .3],
+                       [.2, .2, .6, .53]])
+        Wb = np.array([[.4, .75, .25, 3],
+                       [.5, .4, .7, .53]])
+        self.assertEqual(self.gfmm.hboxes, 4)
+        self.assertEqual(self.gfmm.V.shape, (2, 4))
+        np.testing.assert_array_equal(self.gfmm.V, Vb)
+        np.testing.assert_array_equal(self.gfmm.W, Wb)
+
     def test__overlap_test(self):
         self.gfmm._initialize(self.X2)
         # no initial overlap

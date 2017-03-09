@@ -147,10 +147,12 @@ class GFMM:
             The degree array
         :param k: int
             The number of values to look for.
-        :return: array-like, size=[min(k, len(d))]
+        :return: array-like, size=[min(k, n_hyperboxes)]
             The k indices for the k highest values in d
         """
         k = min(k, len(d))
+        if k == 1:
+            return np.argmax(d)
         idx = np.argpartition(d, -k)[::-1]  # indices for first k which are top k, not necessarily in order
         s_idx = np.argsort(d[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx
         return idx[s_idx]  # returns indices for top k, in sorted order
