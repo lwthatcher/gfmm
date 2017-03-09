@@ -69,8 +69,8 @@ class GFMM:
             self._add_hyperbox(xl, xu, d)
             return
         degree = self.mfunc(xl, xu)
-        k_idxs = self.k_best(degree, self.Kn)
-        print(degree[k_idxs])
+        k_idx = self.k_best(degree, self.Kn)
+        print(degree[k_idx])
 
     def _overlap_test(self):
         """
@@ -107,6 +107,7 @@ class GFMM:
         self.n = X.shape[1]
         # initially no hyperboxes
         self.hboxes = 0
+        self.B_cls = []
         # initialize hyperbox matrices
         self.V = np.zeros((self.n, 0))
         self.W = np.zeros((self.n, 0))
@@ -138,6 +139,16 @@ class GFMM:
         self.B_cls.append(cls)
         # increment number-of-hyperboxes counter
         self.hboxes += 1
+
+    def _valid_class(self, idx, d):
+        pass
+
+    def _can_expand(self, xl, xu, idx):
+        W_max = np.maximum(self.W, xu.reshape(len(xu), 1))
+        V_min = np.minimum(self.V, xl.reshape(len(xl), 1))
+        dim_sizes = W_max - V_min
+        print("diff", dim_sizes)
+
 
     @staticmethod
     def k_best(d, k):

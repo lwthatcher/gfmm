@@ -190,3 +190,15 @@ class TestGFMM(TestCase):
         order = np.argsort(B)[::-1]
         k_best = GFMM.k_best(B, 10)
         np.testing.assert_array_equal(order[:10], k_best)
+
+    def test_can_expand(self):
+        self.gfmm._initialize(self.X2)
+        self.gfmm.V = np.array([[.1, .55, .2],
+                                [.2, .2, .6]])
+        self.gfmm.W = np.array([[.4, .75, .25],
+                                [.5, .4, .7]])
+        self.gfmm.hboxes = 3
+        self.gfmm.B_cls = [1, 2, 1]
+        self.gfmm.ϴ = .3
+        a1 = np.array([.3, .53])
+        self.gfmm._can_expand(a1, a1, [0, 2, 1])
