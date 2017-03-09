@@ -68,9 +68,13 @@ class GFMM:
         if self.hboxes == 0:
             self._add_hyperbox(xl, xu, d)
             return
+        # TODO: check if already within hyperbox?
         degree = self.mfunc(xl, xu)
         k_idx = self.k_best(degree, self.Kn)
-        print(degree[k_idx])
+        # TODO: d == 0? -> expand
+        # TODO: valid-class check
+        # TODO: can-expand check
+        # TODO: otherwise, create new hyperbox
 
     def _overlap_test(self):
         """
