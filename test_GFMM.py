@@ -22,6 +22,24 @@ class TestGFMM(TestCase):
     def setUp(self):
         self.gfmm = GFMM()
 
+    @property
+    def CASE_STUDY_I(self):
+        class _CSI:
+            def __init__(self):
+                self.gfmm = GFMM()
+                self.gfmm.n = 2
+                self.gfmm.hboxes = 3
+                self.gfmm.V = np.array([[.1, .55, .2],
+                                   [.2, .2, .6]])
+                self.gfmm.W = np.array([[.4, .75, .25],
+                                   [.5, .4, .7]])
+                self.gfmm.B_cls = [1, 2, 1]
+                self.gfmm.ϴ = .3
+                self.a1 = np.array([.3, .53])
+                self.a2 = np.array([.38, .55])
+                self.a3 = np.array([.1, .59])
+        return _CSI()
+
     def test__initialize(self):
         # initially 0 dimensions and no hyperboxes
         self.assertEqual(self.gfmm.n, 0)
@@ -192,14 +210,7 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(order[:10], k_best)
 
     def test_can_expand(self):
-        self.gfmm._initialize(self.X2)
-        self.gfmm.V = np.array([[.1, .55, .2],
-                                [.2, .2, .6]])
-        self.gfmm.W = np.array([[.4, .75, .25],
-                                [.5, .4, .7]])
-        self.gfmm.hboxes = 3
-        self.gfmm.B_cls = [1, 2, 1]
-        self.gfmm.ϴ = .3
-        a1 = np.array([.3, .53])
-        r1 = self.gfmm._can_expand(a1, a1, np.array([0, 2, 1]))
+        study = self.CASE_STUDY_I
+        a1 = study.a1
+        r1 = study.gfmm._can_expand(a1, a1, np.array([0, 2, 1]))
         np.testing.assert_array_equal(r1, np.array([2]))
