@@ -145,7 +145,10 @@ class GFMM:
         self.hboxes += 1
 
     def _valid_class(self, idx, d):
-        pass
+        B_cls = np.array(self.B_cls)
+        # gets all hyperboxes that have class 0 or class d
+        result = np.any([B_cls[idx] == 0, B_cls[idx] == d], 0)
+        return idx[result]
 
     def _can_expand(self, xl, xu, idx):
         W_max = np.maximum(self.W[:, idx], xu.reshape(len(xu), 1))
@@ -153,7 +156,6 @@ class GFMM:
         dim_sizes = W_max - V_min
         result = np.all(dim_sizes <= self.ϴ, 0)
         return idx[result]
-
 
     @staticmethod
     def k_best(d, k):

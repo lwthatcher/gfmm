@@ -207,14 +207,19 @@ class TestGFMM(TestCase):
     def test__can_expand(self):
         # 1 result, with index reordering
         s = self.CASE_STUDY_I
-        r1 = s.gfmm._can_expand(s.a1, s.a1, np.array([0, 2, 1]))
-        np.testing.assert_array_equal(r1, np.array([2]))
+        idx = s.gfmm._can_expand(s.a1, s.a1, np.array([0, 2, 1]))
+        np.testing.assert_array_equal(idx, np.array([2]))
         # 1 result, with index trimming
         s = self.CASE_STUDY_I
-        r1 = s.gfmm._can_expand(s.a1, s.a1, np.array([0, 2]))
-        np.testing.assert_array_equal(r1, np.array([2]))
+        idx = s.gfmm._can_expand(s.a1, s.a1, np.array([0, 2]))
+        np.testing.assert_array_equal(idx, np.array([2]))
         # 2 results, with index trimming
         s = self.CASE_STUDY_I
         s.gfmm.ϴ = .33
-        r1 = s.gfmm._can_expand(s.a1, s.a1, np.array([0, 2]))
-        np.testing.assert_array_equal(r1, np.array([0, 2]))
+        idx = s.gfmm._can_expand(s.a1, s.a1, np.array([0, 2]))
+        np.testing.assert_array_equal(idx, np.array([0, 2]))
+
+    def test__valid_class(self):
+        s = self.CASE_STUDY_I
+        idx = s.gfmm._valid_class(np.array([0, 2, 1]), 1)
+        np.testing.assert_array_equal(idx, np.array([0, 2]))
