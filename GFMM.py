@@ -70,7 +70,8 @@ class GFMM:
             return
         # TODO: check if already within hyperbox?
         degree = self.mfunc(xl, xu)
-        k_idx = self.k_best(degree, self.Kn)
+        # idx is an ordered list of indices corresponding to candidate hyperboxes to expand
+        idx = self.k_best(degree, self.Kn)
         # TODO: d == 0? -> expand
         # TODO: valid-class check
         # TODO: can-expand check
@@ -115,6 +116,10 @@ class GFMM:
         # initialize hyperbox matrices
         self.V = np.zeros((self.n, 0))
         self.W = np.zeros((self.n, 0))
+
+    def _expand(self, j, xl, xu):
+        self.V[:,j] = np.minimum(self.V[:,j], xl)
+        self.W[:,j] = np.maximum(self.W[:,j], xu)
 
     def _add_hyperbox(self, xl, xu, cls):
         """

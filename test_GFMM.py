@@ -223,3 +223,16 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         idx = s.gfmm._valid_class(np.array([0, 2, 1]), 1)
         np.testing.assert_array_equal(idx, np.array([0, 2]))
+
+    def test__expand(self):
+        self.gfmm._initialize(self.X2)
+        Vb = np.array([[.1, .7], [.1, .7]])
+        Wb = np.array([[.1, .7], [.1, .7]])
+        Vc = np.array([[.1, .7], [.1, .7]])
+        Wc = np.array([[.5, .7], [.5, .7]])
+        self.gfmm.V = Vb
+        self.gfmm.W = Wb
+        a3 = np.array([.5, .5])
+        self.gfmm._expand(0, a3, a3)
+        np.testing.assert_array_equal(self.gfmm.V, Vc)
+        np.testing.assert_array_equal(self.gfmm.W, Wc)
