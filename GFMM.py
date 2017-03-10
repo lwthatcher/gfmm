@@ -60,6 +60,10 @@ class GFMM:
             The max value for the h'th input pattern
         :param d: the h'th label
             d=0 means unlabeled
+        :return: tuple (j, d')
+            j: The index of the expanded hyperbox.
+                If a new hyperbox was created, then this should be -1
+            d': The classification assigned
         """
         if self.hboxes == 0:
             self._add_hyperbox(xl, xu, d)
@@ -156,6 +160,7 @@ class GFMM:
             dW[:, -1] = xu
         self.W = dW
         # set class of new hyperbox
+        # TODO: add clustering support, where if d==0, B_cls[-1] = p+1
         self.B_cls.append(cls)
         # increment number-of-hyperboxes counter
         self.hboxes += 1
