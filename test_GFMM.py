@@ -172,19 +172,24 @@ class TestGFMM(TestCase):
         # same class
         s = self.CASE_STUDY_I
         a0 = np.array([.3, .3])
-        s.gfmm._expansion(a0, a0, 1)
+        j, d, exp = s.gfmm._expansion(a0, a0, 1)
         self.assertEqual(s.gfmm.hboxes, 3)
-        self.assertEqual(s.gfmm.V.shape, (2, 3))
+        self.assertEqual(j, 0)
+        self.assertEqual(d, 1)
+        self.assertEqual(exp, False)
         np.testing.assert_array_equal(s.gfmm.V, s.Va)
         np.testing.assert_array_equal(s.gfmm.W, s.Wa)
         # unclassified
         s = self.CASE_STUDY_I
         a0 = np.array([.3, .3])
-        s.gfmm._expansion(a0, a0, 0)
+        j, d, exp = s.gfmm._expansion(a0, a0, 0)
         self.assertEqual(s.gfmm.hboxes, 3)
         self.assertEqual(s.gfmm.V.shape, (2, 3))
         np.testing.assert_array_equal(s.gfmm.V, s.Va)
         np.testing.assert_array_equal(s.gfmm.W, s.Wa)
+        self.assertEqual(j, 0)
+        self.assertEqual(d, 1)
+        self.assertEqual(exp, False)
 
     def test_overlap_test(self):
         self.gfmm._initialize(self.X2)

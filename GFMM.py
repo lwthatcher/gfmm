@@ -60,28 +60,37 @@ class GFMM:
             The max value for the h'th input pattern
         :param d: the h'th label
             d=0 means unlabeled
-        :return: tuple (j, d')
-            j: The index of the expanded hyperbox.
-                If a new hyperbox was created, then this should be -1
-            d': The classification assigned
+        :return: tuple (j, d', exp)
+            j: int
+                The index of the expanded or containing hyperbox.
+                If a new hyperbox was created, then this should be -1.
+            d′: int
+                The classification value assigned.
+            exp: boolean
+                True if expansion occurred, False otherwise.
         """
         if self.hboxes == 0:
             self._add_hyperbox(xl, xu, d)
             return
-        # TODO: check if already within hyperbox?
         degree = self.mfunc(xl, xu)
         # idx: ordered list of indices corresponding to candidate hyperboxes to expand
         idx = self.k_best(degree, self.Kn)
-        idx = self._can_expand(idx, xl, xu)
-        if d == 0:
-            self._expand(idx[0], xl, xu)
-        else:
-            idx = self._valid_class(idx, d)
+        if len(idx) > 0:
+            idx = self._can_expand(idx, xl, xu)
             if len(idx) > 0:
-                self._expand(idx[0], xl, xu)
-            else:
-                self._add_hyperbox(xl, xu, d)
-        # return = ?
+                if d == 0:
+                    j = idx[0]
+                    exp = self._expand(j, xl, xu)
+                    return j, self.B_cls[j], exp
+                idx = self._valid_class(idx, d)
+                if len(idx) > 0:
+                    j = idx[0]
+                    exp = self._expand(j, xl, xu)
+                    if self.B_cls[j] == 0:
+                        self.B_cls[j] = d
+                    return j, d, exp
+        dp = self._add_hyperbox(xl, xu, d)
+        return -1, dp, False
 
     def _overlap_test(self):
         """
@@ -132,9 +141,15 @@ class GFMM:
             The lower bound of the input vector to cover
         :param xu: array-like, size=[n_dimensions]
             The upper bound of the input vector to cover
+        :return: boolean
+            True if expansion occurred, False otherwise.
         """
+        # check if completely contained within hyperbox j
+        if np.all([self.V[:,j] < xl, self.W[:,j] > xu]):
+            return False
         self.V[:,j] = np.minimum(self.V[:,j], xl)
         self.W[:,j] = np.maximum(self.W[:,j], xu)
+        return True
 
     def _add_hyperbox(self, xl, xu, cls):
         """
@@ -145,7 +160,8 @@ class GFMM:
         :param xu: array-like, size = [n_dimensions]
             The upper bound of the input vector to set as the initial max values.
         :param cls: int
-            The class of the new hyperbox
+            The classification of the new hyperbox
+        :return: The assigned classification
         """
         # add column to V
         dV = np.zeros((self.n, self.hboxes + 1))
@@ -164,6 +180,8 @@ class GFMM:
         self.B_cls.append(cls)
         # increment number-of-hyperboxes counter
         self.hboxes += 1
+        # return classification
+        return cls
 
     def _valid_class(self, idx, d):
         """
