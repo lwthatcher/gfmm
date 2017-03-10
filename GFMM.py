@@ -213,6 +213,7 @@ class GFMM:
         """
         k = min(k, len(d))
         if k == 1:
+            # needs to be returned as an array, to no break things elsewhere
             return np.array([np.argmax(d)])
         idx = np.argpartition(d, -k)[::-1]  # indices for first k which are top k, not necessarily in order
         s_idx = np.argsort(d[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx

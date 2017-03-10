@@ -224,7 +224,7 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         idx = s.gfmm._can_expand(np.array([2]), s.a1, s.a1)
         np.testing.assert_array_equal(idx, np.array([2]))
-        # 0 results, with scalar index
+        # 0 results, with single index
         s = self.CASE_STUDY_I
         idx = s.gfmm._can_expand(np.array([0]), s.a1, s.a1)
         self.assertEqual(len(idx), 0)
