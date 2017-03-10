@@ -5,10 +5,6 @@ import membership
 class GFMM:
 
     def __init__(self, membership_func=None):
-        """
-
-        :param membership_func:
-        """
         # membership function
         if membership_func is None:
             membership_func = membership.FuzzyMembershipFunction
@@ -70,9 +66,9 @@ class GFMM:
             return
         # TODO: check if already within hyperbox?
         degree = self.mfunc(xl, xu)
-        # idx is an ordered list of indices corresponding to candidate hyperboxes to expand
+        # idx: ordered list of indices corresponding to candidate hyperboxes to expand
         idx = self.k_best(degree, self.Kn)
-        idx = self._can_expand(xl, xu, idx)
+        idx = self._can_expand(idx, xl, xu)
         if d == 0:
             self._expand(idx[0], xl, xu)
         else:
@@ -124,6 +120,15 @@ class GFMM:
         self.W = np.zeros((self.n, 0))
 
     def _expand(self, j, xl, xu):
+        """
+        Expands the j'th hyperbox to fit the provided data
+        :param j: int
+            The index of the hyperbox to expand
+        :param xl: array-like, size=[n_dimensions]
+            The lower bound of the input vector to cover
+        :param xu: array-like, size=[n_dimensions]
+            The upper bound of the input vector to cover
+        """
         self.V[:,j] = np.minimum(self.V[:,j], xl)
         self.W[:,j] = np.maximum(self.W[:,j], xu)
 
@@ -156,12 +161,39 @@ class GFMM:
         self.hboxes += 1
 
     def _valid_class(self, idx, d):
+        """
+        Reduces a list of candidate indices based on whether the corresponding
+        hyperbox is of a valid class.
+        i.e.:
+        Hyperbox Bj has a valid class if class(Bj) == 0 or class(Bj) == d.
+        :param idx: array-like, size<=[min(Kn, n_hyperboxes)]
+            List of candidate indices already being considered.
+        :param d: int
+            The corresponding output class.
+            d == 0 represents unlabeled data.
+        :return: The filtered list of candidate indices.
+        """
         B_cls = np.array(self.B_cls)
         # gets all hyperboxes that have class 0 or class d
         result = np.any([B_cls[idx] == 0, B_cls[idx] == d], 0)
         return idx[result]
 
-    def _can_expand(self, xl, xu, idx):
+    def _can_expand(self, idx, xl, xu):
+        """
+        Checks whether the hyperbox can expand to include the specified point
+        based on the inequality:
+
+        ∀i[max(Wji, xu_i) - min(Vji, xl_i)] ≤ ϴ
+
+         -where i is the input dimension
+        :param idx: array-like, size<=[min(Kn, n_hyperboxes)]
+            List of candidate indices already being considered.
+        :param xl: array-like, size = [n_dimensions]
+            The lower bound of the input vector
+        :param xu: array-like, size = [n_dimensions]
+            The upper bound of the input vector to cover
+        :return: The filtered list of candidate indices.
+        """
         W_max = np.maximum(self.W[:, idx], xu.reshape(len(xu), 1))
         V_min = np.minimum(self.V[:, idx], xl.reshape(len(xl), 1))
         dim_sizes = W_max - V_min
