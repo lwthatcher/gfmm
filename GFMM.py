@@ -110,6 +110,10 @@ class GFMM:
             Δ: the index of the overlapping dimension, returns -1 if no overlap.
             l: the overlap case where l ϵ {1, 2, 3, 4}
         """
+        idx = self.B_cls != d
+        if len(idx) > 0:
+            Vj = self.V[:,j].reshape(self.n, 1)
+            Wj = self.W[:,j].reshape(self.n, 1)
         return -1, None
 
     def _contraction(self, Δ, l):
