@@ -35,7 +35,7 @@ class TestGFMM(TestCase):
                 self.gfmm.hboxes = 3
                 self.gfmm.V = np.copy(self.Va)
                 self.gfmm.W = np.copy(self.Wa)
-                self.gfmm.B_cls = [1, 2, 1]
+                self.gfmm.B_cls = np.array([1, 2, 1])
                 self.gfmm.ϴ = .301
                 self.a1 = np.array([.3, .53])
                 self.a2 = np.array([.38, .55])
@@ -193,22 +193,19 @@ class TestGFMM(TestCase):
 
     def test_overlap_test(self):
         self.gfmm._initialize(self.X2)
-        # no initial overlap
-        d, l = self.gfmm._overlap_test()
-        self.assertEqual(d, -1)
         # no overlap yet
         Vc = np.array([[.1, .7], [.1, .7]])
         Wc = np.array([[.5, .7], [.5, .7]])
         self.gfmm.V = Vc
         self.gfmm.W = Wc
-        d, l = self.gfmm._overlap_test()
+        d, l = self.gfmm._overlap_test(0, 1)
         self.assertEqual(d, -1)
         # overlap
         Vd = np.array([[.1, .4], [.1, .3]])
         Wd = np.array([[.5, .7], [.5, .7]])
         self.gfmm.V = Vd
         self.gfmm.W = Wd
-        d, l = self.gfmm._overlap_test()
+        d, l = self.gfmm._overlap_test(1, 2)
         self.assertEqual(d, 0)
         self.assertEqual(l, 2)
 

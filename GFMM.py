@@ -17,7 +17,7 @@ class GFMM:
         # number of hyperboxes
         self.hboxes = 0
         # classes of hyperboxes
-        self.B_cls = []
+        self.B_cls = np.array([])
         # max size of hyperboxes
         self.ϴ = 0.1
         # speed of decrease of ϴ
@@ -75,8 +75,8 @@ class GFMM:
                 True if expansion occurred, False otherwise.
         """
         if self.hboxes == 0:
-            self._add_hyperbox(xl, xu, d)
-            return
+            ď = self._add_hyperbox(xl, xu, d)
+            return -1, ď, False
         degree = self.mfunc(xl, xu)
         # idx: ordered list of indices corresponding to candidate hyperboxes to expand
         idx = self.k_best(degree, self.Kn)
@@ -137,7 +137,7 @@ class GFMM:
         self.n = X.shape[1]
         # initially no hyperboxes
         self.hboxes = 0
-        self.B_cls = []
+        self.B_cls = np.array([])
         # initialize hyperbox matrices
         self.V = np.zeros((self.n, 0))
         self.W = np.zeros((self.n, 0))
@@ -187,7 +187,7 @@ class GFMM:
         self.W = dW
         # set class of new hyperbox
         # TODO: add clustering support, where if d==0, B_cls[-1] = p+1
-        self.B_cls.append(cls)
+        self.B_cls = np.append(self.B_cls, cls)
         # increment number-of-hyperboxes counter
         self.hboxes += 1
         # return classification
@@ -206,9 +206,10 @@ class GFMM:
             d == 0 represents unlabeled data.
         :return: The filtered list of candidate indices.
         """
-        B_cls = np.array(self.B_cls)
         # gets all hyperboxes that have class 0 or class d
-        result = np.any([B_cls[idx] == 0, B_cls[idx] == d], 0)
+        c0 = self.B_cls[idx] == 0
+        cd = self.B_cls[idx] == d
+        result = np.any([c0, cd], 0)
         return idx[result]
 
     def _can_expand(self, idx, xl, xu):
