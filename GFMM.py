@@ -101,8 +101,13 @@ class GFMM:
         """
         Checks if any hyperboxes are overlapping, and if so which case it is.
         If Δ = -1, then the contraction step can be skipped
+        :param j: int
+            The index of the expanded hyperbox to check for overlap with.
+        :param d: int
+            The output classification of the expanded hyperbox.
+            Note that we can ignore overlap for all other hyperboxes of the same class.
         :return: tuple (Δ, l)
-            Δ: the index of the overlapping dimension, returns -1 if no overlap
+            Δ: the index of the overlapping dimension, returns -1 if no overlap.
             l: the overlap case where l ϵ {1, 2, 3, 4}
         """
         return -1, None
