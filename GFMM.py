@@ -35,15 +35,20 @@ class GFMM:
             note that d=0 corresponds to an unlabeled item
         """
         input_length = X.shape[0]
+        # TODO: initialize only once option?
         self._initialize(X)
+        out = []
 
         for h in range(input_length):
             xl = self.X_l[h, :]
             xu = self.X_u[h, :]
             d = Y[h]
-            self._expansion(xl, xu, d)
-            Δ, l = self._overlap_test()
-            self._contraction(Δ, l)
+            j, ď, exp = self._expansion(xl, xu, d)
+            out.append(ď)
+            if exp:
+                Δ, l = self._overlap_test(j, ď)
+                self._contraction(Δ, l)
+        return out
 
     def predict(self, X):
         pass
@@ -60,11 +65,11 @@ class GFMM:
             The max value for the h'th input pattern
         :param d: the h'th label
             d=0 means unlabeled
-        :return: tuple (j, d', exp)
+        :return: tuple (j, ď, exp)
             j: int
                 The index of the expanded or containing hyperbox.
                 If a new hyperbox was created, then this should be -1.
-            d′: int
+            ď: int
                 The classification value assigned.
             exp: boolean
                 True if expansion occurred, False otherwise.
@@ -89,10 +94,10 @@ class GFMM:
                     if self.B_cls[j] == 0:
                         self.B_cls[j] = d
                     return j, d, exp
-        dp = self._add_hyperbox(xl, xu, d)
-        return -1, dp, False
+        ď = self._add_hyperbox(xl, xu, d)
+        return -1, ď, False
 
-    def _overlap_test(self):
+    def _overlap_test(self, j, d):
         """
         Checks if any hyperboxes are overlapping, and if so which case it is.
         If Δ = -1, then the contraction step can be skipped
