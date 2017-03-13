@@ -110,11 +110,43 @@ class GFMM:
             Δ: the index of the overlapping dimension, returns -1 if no overlap.
             l: the overlap case where l ϵ {1, 2, 3, 4}
         """
-        idx = self.B_cls != d
+        Δ = -1
+        l = None
+        # get candidate boxes
+        if self.B_cls[j] == 0:
+            # if d == 0, check for overlap with all other hyperboxes
+            idx = self.B_cls >= 0
+        else:
+            # otherwise don't check for overlap within the same class
+            idx = self.B_cls != d
+        # if no candidates for overlap, Δ = -1
         if len(idx) > 0:
-            Vj = self.V[:,j].reshape(self.n, 1)
-            Wj = self.W[:,j].reshape(self.n, 1)
-        return -1, None
+            δ_old = np.ones((self.n, 1))
+            # alias for convenience
+            V = self.V[idx]
+            W = self.W[idx]
+            # hyperbox Bj
+            Vj = V[:,j].reshape(self.n, 1)
+            Wj = W[:,j].reshape(self.n, 1)
+            # store some other useful variables
+            vjv = Vj < V
+            wjw = Wj < W
+            vvj = V < Vj
+            wwj = W < Wj
+            # case 1
+            case_1 = np.all([vjv, V<Wj, wjw], 0)
+
+            # case 2
+            case_2 = np.all([vvj, Vj<W, wwj], 0)
+
+            # case 3
+            case_3 = np.all([vjv, V<=W, wwj], 0)
+
+            # case 4
+            case_4 = np.all([vvj, wjw])
+
+
+        return Δ, l
 
     def _contraction(self, Δ, l):
         if Δ == -1:
