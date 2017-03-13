@@ -271,6 +271,25 @@ class GFMM:
         result = np.all(dim_sizes <= self.ϴ, 0)
         return idx[result]
 
+    def _min_overlap_adjust_index(self, V, W, Vj, Wj):
+        """
+        Finds the dimension, case, and hyperbox index of the minimum overlap adjustment.
+        Here it compares the j'th hyperbox against all other candidate hyperboxes
+        :param V: array-like, size=[n_dimension, n_candidates]
+            The filtered min matrix
+        :param W: array-like , size=[n_dimension, n_candidates]
+            The filtered max matrix
+        :param Vj: array-like, size=[n_dimensions]
+            The min values for the j'th hyperbox.
+        :param Wj: array-like, size=[n_dimensions]
+            The max values for the j'th hyperbox.
+        :return: tuple (Δ, l, k)
+            Δ: the index of the least overlapping dimension, returns -1 if no overlap.
+            l: the overlap case where l ϵ {1, 2, 3, 4}
+            k: the index of the other hyperbox to adjust
+        """
+        pass
+
     @staticmethod
     def k_best(d, k):
         """
