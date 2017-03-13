@@ -129,6 +129,7 @@ class GFMM:
             Vj = V[:,j].reshape(self.n, 1)
             Wj = W[:,j].reshape(self.n, 1)
             # store some other useful variables
+            # TODO: extract below to separate function
             vjv = Vj < V
             wjw = Wj < W
             vvj = V < Vj
@@ -143,7 +144,7 @@ class GFMM:
             case_3 = np.all([vjv, V<=W, wwj], 0)
 
             # case 4
-            case_4 = np.all([vvj, wjw])
+            case_4 = np.all([vvj, wjw], 0)
 
 
         return Δ, l
