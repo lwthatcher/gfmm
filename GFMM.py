@@ -299,8 +299,10 @@ class GFMM:
         c4[case_4 != True] = FILL
         # pull together for convenience
         diff = np.array([c1, c2, c3, c4])
+        # if no overlap, Δ = -1
+        if np.all(diff == FILL):
+            return -1, None, None
         l, Δ, k = np.unravel_index(diff.argmin(), diff.shape)
-        # TODO: set Δ to -1 if no overlap..?
         l += 1  # convert from zero index so l ϵ {1, 2, 3, 4}
         # TODO: convert from filtered array indices, to actual indices?
         return Δ, l, k

@@ -195,7 +195,7 @@ class TestGFMM(TestCase):
         self.gfmm.W = ex.Wc
         d, l = self.gfmm._overlap_test(1, 2)
         self.assertEqual(d, -1)
-        # overlap
+        # KnFMM Fig. 4.d
         self.gfmm.V = ex.Vd
         self.gfmm.W = ex.Wd
         d, l = self.gfmm._overlap_test(1, 2)
