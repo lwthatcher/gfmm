@@ -273,10 +273,9 @@ class GFMM:
         :return: tuple (Δ, l, k)
             Δ: the index of the least overlapping dimension, returns -1 if no overlap.
             l: the overlap case where l ϵ {1, 2, 3, 4}
-            k: the index of the other hyperbox to adjust
+            k: the index of the other hyperbox to adjust, relative to V and W.
         """
-        # TODO: Is 1 the best choice?
-        FILL = 1
+        FILL = np.nan
         # only compute these values once
         vjv = Vj < V
         wjw = Wj < W
@@ -300,11 +299,10 @@ class GFMM:
         # pull together for convenience
         diff = np.array([c1, c2, c3, c4])
         # if no overlap, Δ = -1
-        if np.all(diff == FILL):
+        if np.all(np.isnan(diff)):
             return -1, None, None
-        l, Δ, k = np.unravel_index(diff.argmin(), diff.shape)
+        l, Δ, k = np.unravel_index(np.nanargmin(diff), diff.shape)
         l += 1  # convert from zero index so l ϵ {1, 2, 3, 4}
-        # TODO: convert from filtered array indices, to actual indices?
         return Δ, l, k
 
     @staticmethod
