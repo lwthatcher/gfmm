@@ -46,8 +46,8 @@ class GFMM:
             j, ď, exp = self._expansion(xl, xu, d)
             out.append(ď)
             if exp:
-                Δ, l = self._overlap_test(j, ď)
-                self._contraction(Δ, l)
+                Δ, l, k = self._overlap_test(j, ď)
+                self._contraction(Δ, l, j, k)
         return out
 
     def predict(self, X):
@@ -106,12 +106,13 @@ class GFMM:
         :param d: int
             The output classification of the expanded hyperbox.
             Note that we can ignore overlap for all other hyperboxes of the same class.
-        :return: tuple (Δ, l)
+        :return: tuple (Δ, l, k)
             Δ: the index of the overlapping dimension, returns -1 if no overlap.
             l: the overlap case where l ϵ {1, 2, 3, 4}
+            k: the index of the other hyperbox to adjust.
         """
         Δ = -1
-        l = None
+        l = k = None
         # get candidate boxes
         if self.B_cls[j] == 0:
             # if d == 0, check for overlap with all other hyperboxes
@@ -133,9 +134,18 @@ class GFMM:
             Wj = self.W[:,j].reshape(self.n, 1)
             # store some other useful variables
             Δ, l, k = self.min_overlap_adjustment(V, W, Vj, Wj)
-        return Δ, l
+            # TODO: convert k back into index relative to self.V/self.W
+        return Δ, l, k
 
-    def _contraction(self, Δ, l):
+    def _contraction(self, Δ, l, j, k):
+        """
+        If overlap occurred, contracts the specified hyperboxes to eliminate overlap.
+        If no overlap has occurred (Δ == -1), then no contraction takes place.
+        :param Δ: the index of the overlapping dimension, -1 if no overlap
+        :param l: the overlap case where l ϵ {1, 2, 3, 4}
+        :param j: index for recently expanded hyperbox Bj
+        :param k: index for the hyperbox Bk that overlaps with Bj
+        """
         if Δ == -1:
             return
         pass

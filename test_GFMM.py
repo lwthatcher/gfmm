@@ -130,7 +130,7 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(self.gfmm.V, Vf)
         np.testing.assert_array_equal(self.gfmm.W, Wf)
 
-    # region Expansion Tests
+    # region Expansion
     def test_expansion(self):
         self.gfmm._initialize(self.X2)
         self.gfmm.ϴ = .4
@@ -203,29 +203,41 @@ class TestGFMM(TestCase):
         self.assertEqual(exp, False)
     # endregion
 
+    # region Overlap Test
     def test_overlap_test(self):
         ex = self.EX_1
         gfmm = ex.gfmm
-        # no overlap yet
+        # KnFMM Fig 4.c (no overlap)
         gfmm.V = ex.Vc
         gfmm.W = ex.Wc
-        d, l = gfmm._overlap_test(1, 2)
+        d, l, k = gfmm._overlap_test(1, 2)
         self.assertEqual(d, -1)
-        # KnFMM Fig. 4.d
+        # KnFMM Fig 4.d (overlap)
         gfmm.V = ex.Vd
         gfmm.W = ex.Wd
-        d, l = gfmm._overlap_test(1, 2)
+        d, l, k = gfmm._overlap_test(1, 2)
         self.assertEqual(d, 0)
         self.assertEqual(l, 2)
 
+    def test_overlap_test__k(self):
+        # TODO: implement
+        self.fail("test not implemented")
+    # endregion
+
+    # region Contraction
     def test_contraction(self):
         ex = self.EX_1
         gfmm = ex.gfmm
         gfmm.V = ex.Vd
         gfmm.W = ex.Wd
-        gfmm._contraction(0, 2)
+        gfmm._contraction(0, 2, 1, 0)
         np.testing.assert_array_equal(gfmm.V, ex.Ve)
         np.testing.assert_array_equal(gfmm.W, ex.We)
+
+    def test_contraction__no_overlap(self):
+        # TODO: implement
+        self.fail("test not implemented")
+    # endregion
 
     def test__initialize(self):
         # initially 0 dimensions and no hyperboxes
@@ -323,8 +335,8 @@ class TestGFMM(TestCase):
         gfmm.W = ex.Wb
         a3 = np.array([.5, .5])
         gfmm._expand(0, a3, a3)
-        np.testing.assert_array_equal(self.gfmm.V, ex.Vc)
-        np.testing.assert_array_equal(self.gfmm.W, ex.Wc)
+        np.testing.assert_array_equal(gfmm.V, ex.Vc)
+        np.testing.assert_array_equal(gfmm.W, ex.Wc)
 
     def test__min_overlap_adjustment(self):
         ex = self.EX_1
