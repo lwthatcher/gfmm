@@ -42,6 +42,52 @@ class TestGFMM(TestCase):
                 self.a3 = np.array([.1, .59])
         return _CSI()
 
+    @property
+    def EX_1(self):
+        """
+        The example illustrated in Fig 4 from the KnFMM paper
+        """
+        class _EX1:
+            def __init__(self):
+                # Fig 4.c
+                self.Vc = np.array([[.1, .7], [.1, .7]])
+                self.Wc = np.array([[.5, .7], [.5, .7]])
+                # Fig 4.d
+                self.Vd = np.array([[.1, .4], [.1, .3]])
+                self. Wd = np.array([[.5, .7], [.5, .7]])
+                # Fig 4.d with added hyperboxes
+                self.Vd2 = np.array([[.1, .9, .4], [.1, .9, .8]])
+                self.Wd2 = np.array([[.5, 1, .6], [.5, 1.1, 1]])
+                self.Vd2_a = np.array([[.1, .4, .9, .4], [.1, .3, .9, .8]])
+                self.Wd2_a = np.array([[.5, .7, 1, .6], [.5, .7, 1.1, 1]])
+                self.Vd2_j = np.array([[.4], [.3]])
+                self.Wd2_j = np.array([[.7], [.7]])
+        return _EX1()
+
+    @property
+    def EX_2(self):
+        """
+        Custom example with two overlaying boxes
+        """
+        class _EX2:
+            def __init__(self):
+                self.V = np.array([[.1,.05],[.1,.2]])
+                self.W = np.array([[.3,.35],[.3,.4]])
+        return _EX2()
+
+    @property
+    def EX_3(self):
+        """
+        Custom example with box-within-a-box
+        """
+        class _EX2:
+            def __init__(self):
+                self.V = np.array([[.1, .3],[.1, .05]])
+                self.W = np.array([[.4, .7],[.4, .35]])
+                self.Vj = np.array([[.25], [.29]])
+                self.Wj = np.array([[.35], [.38]])
+        return _EX2()
+
     def test__initialize(self):
         # initially 0 dimensions and no hyperboxes
         self.assertEqual(self.gfmm.n, 0)
@@ -268,3 +314,16 @@ class TestGFMM(TestCase):
         self.gfmm._expand(0, a3, a3)
         np.testing.assert_array_equal(self.gfmm.V, Vc)
         np.testing.assert_array_equal(self.gfmm.W, Wc)
+
+    def test__min_overlap_adjust_index(self):
+        ex = self.EX_1
+        d, l, k = GFMM.min_overlap_adjust_index(ex.Vd2, ex.Wd2, ex.Vd2_j, ex.Wd2_j)
+        self.assertEqual(d, 0)  # dimension 0 (zero-indexed)
+        self.assertEqual(l, 2)  # case 2 (one-indexed)
+        self.assertEqual(k, 0)  # first hyperbox (zero-indexed)
+        ex = self.EX_3
+        d, l, k = GFMM.min_overlap_adjust_index(ex.V, ex.W, ex.Vj, ex.Wj)
+        self.assertEqual(d, 0)  # dimension 0 (zero-indexed)
+        self.assertEqual(l, 1)  # case 1 (one-indexed)
+        self.assertEqual(k, 1)  # second hyperbox (zero-indexed)
+

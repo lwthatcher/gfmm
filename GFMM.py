@@ -257,7 +257,8 @@ class GFMM:
         result = np.all(dim_sizes <= self.ϴ, 0)
         return idx[result]
 
-    def _min_overlap_adjust_index(self, V, W, Vj, Wj):
+    @staticmethod
+    def min_overlap_adjust_index(V, W, Vj, Wj):
         """
         Finds the dimension, case, and hyperbox index of the minimum overlap adjustment.
         Here it compares the j'th hyperbox against all other candidate hyperboxes
@@ -289,8 +290,8 @@ class GFMM:
         # get the respective overlap matrices
         c1 = Wj-V
         c2 = W-Vj
-        c3 = np.min(c2, c1)
-        c4 = np.min(c1, c2)
+        c3 = np.minimum(c2, c1)
+        c4 = np.minimum(c1, c2)
         # mask non-overlapping values
         c1[case_1 != True] = FILL
         c2[case_2 != True] = FILL
@@ -298,8 +299,10 @@ class GFMM:
         c4[case_4 != True] = FILL
         # pull together for convenience
         diff = np.array([c1, c2, c3, c4])
-        indices = np.unravel_index(diff.argmax(), diff.shape)
-        # TODO: return stuff!
+        l, Δ, k = np.unravel_index(diff.argmin(), diff.shape)
+        l += 1  # convert from zero index so l ϵ {1, 2, 3, 4}
+        # TODO: convert from filtered array indices, to actual indices?
+        return Δ, l, k
 
     @staticmethod
     def k_best(d, k):
