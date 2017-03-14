@@ -121,7 +121,6 @@ class GFMM:
             idx = self.B_cls != d
         # if no candidates for overlap, Δ = -1
         if len(idx) > 0:
-            δ_old = np.ones((self.n, 1))
             # alias for convenience
             V = self.V[idx]
             W = self.W[idx]
@@ -258,7 +257,7 @@ class GFMM:
         return idx[result]
 
     @staticmethod
-    def min_overlap_adjust_index(V, W, Vj, Wj):
+    def min_overlap_adjustment(V, W, Vj, Wj):
         """
         Finds the dimension, case, and hyperbox index of the minimum overlap adjustment.
         Here it compares the j'th hyperbox against all other candidate hyperboxes

@@ -315,14 +315,14 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(self.gfmm.V, Vc)
         np.testing.assert_array_equal(self.gfmm.W, Wc)
 
-    def test__min_overlap_adjust_index(self):
+    def test__min_overlap_adjustment(self):
         ex = self.EX_1
-        d, l, k = GFMM.min_overlap_adjust_index(ex.Vd2, ex.Wd2, ex.Vd2_j, ex.Wd2_j)
+        d, l, k = GFMM.min_overlap_adjustment(ex.Vd2, ex.Wd2, ex.Vd2_j, ex.Wd2_j)
         self.assertEqual(d, 0)  # dimension 0 (zero-indexed)
         self.assertEqual(l, 2)  # case 2 (one-indexed)
         self.assertEqual(k, 0)  # first hyperbox (zero-indexed)
         ex = self.EX_3
-        d, l, k = GFMM.min_overlap_adjust_index(ex.V, ex.W, ex.Vj, ex.Wj)
+        d, l, k = GFMM.min_overlap_adjustment(ex.V, ex.W, ex.Vj, ex.Wj)
         self.assertEqual(d, 0)  # dimension 0 (zero-indexed)
         self.assertEqual(l, 1)  # case 1 (one-indexed)
         self.assertEqual(k, 1)  # second hyperbox (zero-indexed)
