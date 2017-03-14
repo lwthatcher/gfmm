@@ -49,12 +49,15 @@ class TestGFMM(TestCase):
         """
         class _EX1:
             def __init__(self):
+                # hyperbox classifications
+                self.B_cls = np.array([1, 2])  # default
+                self.d2_cls = np.array([1, 2, 1, 3])  # used in d2
                 # Fig 4.c
                 self.Vc = np.array([[.1, .7], [.1, .7]])
                 self.Wc = np.array([[.5, .7], [.5, .7]])
                 # Fig 4.d
                 self.Vd = np.array([[.1, .4], [.1, .3]])
-                self. Wd = np.array([[.5, .7], [.5, .7]])
+                self.Wd = np.array([[.5, .7], [.5, .7]])
                 # Fig 4.d with added hyperboxes
                 self.Vd2 = np.array([[.1, .9, .4], [.1, .9, .8]])
                 self.Wd2 = np.array([[.5, 1, .6], [.5, 1.1, 1]])
@@ -87,60 +90,6 @@ class TestGFMM(TestCase):
                 self.Vj = np.array([[.25], [.29]])
                 self.Wj = np.array([[.35], [.38]])
         return _EX2()
-
-    def test__initialize(self):
-        # initially 0 dimensions and no hyperboxes
-        self.assertEqual(self.gfmm.n, 0)
-        self.assertEqual(self.gfmm.hboxes, 0)
-        # 3 dims, 3 examples
-        self.gfmm._initialize(self.X1)
-        self.assertEqual(self.gfmm.V.shape, (3, 0))
-        self.assertEqual(self.gfmm.W.shape, (3, 0))
-        self.assertEqual(self.gfmm.n, 3)
-        self.assertEqual(self.gfmm.hboxes, 0)
-        self.assertEqual(self.gfmm.X_l[0, 0], 1)
-        self.assertEqual(self.gfmm.X_u[0, 0], 1)
-        # 2 dims, 4 examples
-        self.gfmm._initialize(self.X2)
-        self.assertEqual(self.gfmm.V.shape, (2, 0))
-        self.assertEqual(self.gfmm.W.shape, (2, 0))
-        self.assertEqual(self.gfmm.n, 2)
-        self.assertEqual(self.gfmm.hboxes, 0)
-        self.assertEqual(self.gfmm.X_l[0, 0], .1)
-        self.assertEqual(self.gfmm.X_u[0, 0], .1)
-        # set with different min/max values
-        self.gfmm._initialize(self.X3)
-        self.assertEqual(self.gfmm.V.shape, (2, 0))
-        self.assertEqual(self.gfmm.W.shape, (2, 0))
-        self.assertEqual(self.gfmm.n, 2)
-        self.assertEqual(self.gfmm.hboxes, 0)
-        self.assertEqual(self.gfmm.X_l[0, 0], .1)
-        self.assertEqual(self.gfmm.X_u[0, 0], .15)
-
-    def test__add_hyperbox(self):
-        # initially none
-        self.gfmm._initialize(self.X2)
-        self.assertEqual(self.gfmm.hboxes, 0)
-        self.assertEqual(len(self.gfmm.B_cls), 0)
-        # 1 hyperbox
-        xl = np.array([.1, .1])
-        xu = np.array([.15, .15])
-        self.gfmm._add_hyperbox(xl, xu, 1)
-        self.assertEqual(self.gfmm.hboxes, 1)
-        self.assertEqual(self.gfmm.V[0, 0], .1)
-        self.assertEqual(self.gfmm.W[0, 0], .15)
-        self.assertEqual(self.gfmm.V.shape, (2, 1))
-        self.assertEqual(len(self.gfmm.B_cls), 1)
-        self.assertEqual(self.gfmm.B_cls[0], 1)
-        # 2 hyperboxes
-        xl = np.array([.7, .7])
-        xu = np.array([.75, .75])
-        self.gfmm._add_hyperbox(xl, xu, 2)
-        self.assertEqual(self.gfmm.hboxes, 2)
-        self.assertEqual(self.gfmm.V[0, 1], .7)
-        self.assertEqual(self.gfmm.V.shape, (2, 2))
-        self.assertEqual(len(self.gfmm.B_cls), 2)
-        self.assertEqual(self.gfmm.B_cls[1], 2)
 
     def test_fit(self):
         Vf = np.array([[.1, .45],
@@ -239,18 +188,16 @@ class TestGFMM(TestCase):
 
     def test_overlap_test(self):
         self.gfmm._initialize(self.X2)
+        ex = self.EX_1
+        self.gfmm.B_cls = ex.B_cls
         # no overlap yet
-        Vc = np.array([[.1, .7], [.1, .7]])
-        Wc = np.array([[.5, .7], [.5, .7]])
-        self.gfmm.V = Vc
-        self.gfmm.W = Wc
-        d, l = self.gfmm._overlap_test(0, 1)
+        self.gfmm.V = ex.Vc
+        self.gfmm.W = ex.Wc
+        d, l = self.gfmm._overlap_test(1, 2)
         self.assertEqual(d, -1)
         # overlap
-        Vd = np.array([[.1, .4], [.1, .3]])
-        Wd = np.array([[.5, .7], [.5, .7]])
-        self.gfmm.V = Vd
-        self.gfmm.W = Wd
+        self.gfmm.V = ex.Vd
+        self.gfmm.W = ex.Wd
         d, l = self.gfmm._overlap_test(1, 2)
         self.assertEqual(d, 0)
         self.assertEqual(l, 2)
@@ -266,6 +213,60 @@ class TestGFMM(TestCase):
         We = np.array([[.45, .7], [.5, .7]])
         np.testing.assert_array_equal(self.gfmm.V, Ve)
         np.testing.assert_array_equal(self.gfmm.W, We)
+
+    def test__initialize(self):
+        # initially 0 dimensions and no hyperboxes
+        self.assertEqual(self.gfmm.n, 0)
+        self.assertEqual(self.gfmm.hboxes, 0)
+        # 3 dims, 3 examples
+        self.gfmm._initialize(self.X1)
+        self.assertEqual(self.gfmm.V.shape, (3, 0))
+        self.assertEqual(self.gfmm.W.shape, (3, 0))
+        self.assertEqual(self.gfmm.n, 3)
+        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.X_l[0, 0], 1)
+        self.assertEqual(self.gfmm.X_u[0, 0], 1)
+        # 2 dims, 4 examples
+        self.gfmm._initialize(self.X2)
+        self.assertEqual(self.gfmm.V.shape, (2, 0))
+        self.assertEqual(self.gfmm.W.shape, (2, 0))
+        self.assertEqual(self.gfmm.n, 2)
+        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.X_l[0, 0], .1)
+        self.assertEqual(self.gfmm.X_u[0, 0], .1)
+        # set with different min/max values
+        self.gfmm._initialize(self.X3)
+        self.assertEqual(self.gfmm.V.shape, (2, 0))
+        self.assertEqual(self.gfmm.W.shape, (2, 0))
+        self.assertEqual(self.gfmm.n, 2)
+        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.X_l[0, 0], .1)
+        self.assertEqual(self.gfmm.X_u[0, 0], .15)
+
+    def test__add_hyperbox(self):
+        # initially none
+        self.gfmm._initialize(self.X2)
+        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(len(self.gfmm.B_cls), 0)
+        # 1 hyperbox
+        xl = np.array([.1, .1])
+        xu = np.array([.15, .15])
+        self.gfmm._add_hyperbox(xl, xu, 1)
+        self.assertEqual(self.gfmm.hboxes, 1)
+        self.assertEqual(self.gfmm.V[0, 0], .1)
+        self.assertEqual(self.gfmm.W[0, 0], .15)
+        self.assertEqual(self.gfmm.V.shape, (2, 1))
+        self.assertEqual(len(self.gfmm.B_cls), 1)
+        self.assertEqual(self.gfmm.B_cls[0], 1)
+        # 2 hyperboxes
+        xl = np.array([.7, .7])
+        xu = np.array([.75, .75])
+        self.gfmm._add_hyperbox(xl, xu, 2)
+        self.assertEqual(self.gfmm.hboxes, 2)
+        self.assertEqual(self.gfmm.V[0, 1], .7)
+        self.assertEqual(self.gfmm.V.shape, (2, 2))
+        self.assertEqual(len(self.gfmm.B_cls), 2)
+        self.assertEqual(self.gfmm.B_cls[1], 2)
 
     def test__k_best(self):
         # large list

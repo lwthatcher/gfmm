@@ -115,7 +115,8 @@ class GFMM:
         # get candidate boxes
         if self.B_cls[j] == 0:
             # if d == 0, check for overlap with all other hyperboxes
-            idx = self.B_cls >= 0
+            idx = self.B_cls >= 0   # all True
+            idx[j] = False      # exclude j'th hyperbox
         else:
             # otherwise don't check for overlap within the same class
             idx = self.B_cls != d
@@ -124,14 +125,14 @@ class GFMM:
             # alias for convenience
             V = self.V[idx]
             W = self.W[idx]
+            if V.shape == (1, 2):   # make sure V and W are column vectors
+                V = V.reshape(self.n, 1)
+                W = W.reshape(self.n, 1)
             # hyperbox Bj
-            Vj = V[:,j].reshape(self.n, 1)
-            Wj = W[:,j].reshape(self.n, 1)
+            Vj = self.V[:,j].reshape(self.n, 1)
+            Wj = self.W[:,j].reshape(self.n, 1)
             # store some other useful variables
-            # TODO: extract below to separate function
-
-
-
+            Δ, l, k = self.min_overlap_adjustment(V, W, Vj, Wj)
         return Δ, l
 
     def _contraction(self, Δ, l):
@@ -299,6 +300,7 @@ class GFMM:
         # pull together for convenience
         diff = np.array([c1, c2, c3, c4])
         l, Δ, k = np.unravel_index(diff.argmin(), diff.shape)
+        # TODO: set Δ to -1 if no overlap..?
         l += 1  # convert from zero index so l ϵ {1, 2, 3, 4}
         # TODO: convert from filtered array indices, to actual indices?
         return Δ, l, k
