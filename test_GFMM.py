@@ -22,14 +22,29 @@ class TestGFMM(TestCase):
     def setUp(self):
         self.gfmm = GFMM()
 
+    # region Examples
     @property
     def CASE_STUDY_I(self):
+        """
+        The example illustrated in Fig. 5,6 from the KnFMM paper
+        """
         class _CSI:
             def __init__(self):
+                # initial state
                 self.Va = np.array([[.1, .55, .2],
                                     [.2, .2, .6]])
                 self.Wa = np.array([[.4, .75, .25],
                                     [.5, .4, .7]])
+                # Fig 6.b
+                self.Vb = np.array([[.1, .55, .2],
+                                    [.2, .2, .53]])
+                self.Wb = np.array([[.4, .75, .3],
+                                    [.5, .4, .7]])
+                # Fig 5.b
+                self.Vb_k1 = np.array([[.1, .55, .2, .3],
+                                       [.2, .2, .6, .53]])
+                self.Wb_k1 = np.array([[.4, .75, .25, .3],
+                                       [.5, .4, .7, .53]])
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
                 self.gfmm.hboxes = 3
@@ -52,6 +67,11 @@ class TestGFMM(TestCase):
                 # hyperbox classifications
                 self.B_cls = np.array([1, 2])  # default
                 self.d2_cls = np.array([1, 2, 1, 3])  # used in d2
+                # some default gfmm values
+                self.gfmm = GFMM()
+                self.gfmm.n = 2
+                self.gfmm.hboxes = 2
+                self.gfmm.B_cls = self.B_cls
                 # Fig 4.c
                 self.Vc = np.array([[.1, .7], [.1, .7]])
                 self.Wc = np.array([[.5, .7], [.5, .7]])
@@ -90,6 +110,7 @@ class TestGFMM(TestCase):
                 self.Vj = np.array([[.25], [.29]])
                 self.Wj = np.array([[.35], [.38]])
         return _EX2()
+    # endregion
 
     def test_fit(self):
         Vf = np.array([[.1, .45],
@@ -103,6 +124,7 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(self.gfmm.V, Vf)
         np.testing.assert_array_equal(self.gfmm.W, Wf)
 
+    # region Expansion Tests
     def test_expansion(self):
         self.gfmm._initialize(self.X2)
         self.gfmm.ϴ = .4
@@ -130,38 +152,26 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         s.gfmm.Kn = 1
         s.gfmm._expansion(s.a1, s.a1, 1)
-        Vb = np.array([[.1, .55, .2, .3],
-                       [.2, .2, .6, .53]])
-        Wb = np.array([[.4, .75, .25, .3],
-                       [.5, .4, .7, .53]])
         self.assertEqual(s.gfmm.hboxes, 4)
         self.assertEqual(s.gfmm.V.shape, (2, 4))
-        np.testing.assert_array_equal(s.gfmm.V, Vb)
-        np.testing.assert_array_equal(s.gfmm.W, Wb)
+        np.testing.assert_array_equal(s.gfmm.V, s.Vb_k1)
+        np.testing.assert_array_equal(s.gfmm.W, s.Wb_k1)
         # ----- Kn == 3 -----
         s = self.CASE_STUDY_I
         s.gfmm.Kn = 3
         s.gfmm._expansion(s.a1, s.a1, 1)
-        Vb = np.array([[.1, .55, .2],
-                       [.2, .2, .53]])
-        Wb = np.array([[.4, .75, .3],
-                       [.5, .4, .7]])
         self.assertEqual(s.gfmm.hboxes, 3)
         self.assertEqual(s.gfmm.V.shape, (2, 3))
-        np.testing.assert_array_equal(s.gfmm.V, Vb)
-        np.testing.assert_array_equal(s.gfmm.W, Wb)
+        np.testing.assert_array_equal(s.gfmm.V, s.Vb)
+        np.testing.assert_array_equal(s.gfmm.W, s.Wb)
         # ----- Kn > n_hyperboxes -----
         s = self.CASE_STUDY_I
         s.gfmm.Kn = 10
         s.gfmm._expansion(s.a1, s.a1, 1)
-        Vb = np.array([[.1, .55, .2],
-                       [.2, .2, .53]])
-        Wb = np.array([[.4, .75, .3],
-                       [.5, .4, .7]])
         self.assertEqual(s.gfmm.hboxes, 3)
         self.assertEqual(s.gfmm.V.shape, (2, 3))
-        np.testing.assert_array_equal(s.gfmm.V, Vb)
-        np.testing.assert_array_equal(s.gfmm.W, Wb)
+        np.testing.assert_array_equal(s.gfmm.V, s.Vb)
+        np.testing.assert_array_equal(s.gfmm.W, s.Wb)
 
     def test_expansion__within_existing_hyperbox(self):
         # same class
@@ -185,6 +195,7 @@ class TestGFMM(TestCase):
         self.assertEqual(j, 0)
         self.assertEqual(d, 1)
         self.assertEqual(exp, False)
+    # endregion
 
     def test_overlap_test(self):
         self.gfmm._initialize(self.X2)
