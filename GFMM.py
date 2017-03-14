@@ -130,21 +130,7 @@ class GFMM:
             Wj = W[:,j].reshape(self.n, 1)
             # store some other useful variables
             # TODO: extract below to separate function
-            vjv = Vj < V
-            wjw = Wj < W
-            vvj = V < Vj
-            wwj = W < Wj
-            # case 1
-            case_1 = np.all([vjv, V<Wj, wjw], 0)
 
-            # case 2
-            case_2 = np.all([vvj, Vj<W, wwj], 0)
-
-            # case 3
-            case_3 = np.all([vjv, V<=W, wwj], 0)
-
-            # case 4
-            case_4 = np.all([vvj, wjw], 0)
 
 
         return Δ, l
@@ -288,7 +274,32 @@ class GFMM:
             l: the overlap case where l ϵ {1, 2, 3, 4}
             k: the index of the other hyperbox to adjust
         """
-        pass
+        # TODO: Is 1 the best choice?
+        FILL = 1
+        # only compute these values once
+        vjv = Vj < V
+        wjw = Wj < W
+        vvj = V < Vj
+        wwj = W < Wj
+        # get indices where each case is true
+        case_1 = np.all([vjv, V < Wj, wjw], 0)
+        case_2 = np.all([vvj, Vj < W, wwj], 0)
+        case_3 = np.all([vjv, V <= W, wwj], 0)
+        case_4 = np.all([vvj, wjw], 0)
+        # get the respective overlap matrices
+        c1 = Wj-V
+        c2 = W-Vj
+        c3 = np.min(c2, c1)
+        c4 = np.min(c1, c2)
+        # mask non-overlapping values
+        c1[case_1 != True] = FILL
+        c2[case_2 != True] = FILL
+        c3[case_3 != True] = FILL
+        c4[case_4 != True] = FILL
+        # pull together for convenience
+        diff = np.array([c1, c2, c3, c4])
+        indices = np.unravel_index(diff.argmax(), diff.shape)
+        # TODO: return stuff!
 
     @staticmethod
     def k_best(d, k):
