@@ -146,9 +146,30 @@ class GFMM:
         :param j: index for recently expanded hyperbox Bj
         :param k: index for the hyperbox Bk that overlaps with Bj
         """
+        # if no overlap, no expansion
         if Δ == -1:
             return
-        pass
+        # case 1
+        elif l == 1:
+            di = (self.V[Δ, k] + self.W[Δ, j]) / 2
+            self.V[Δ, k] = di
+            self.W[Δ, j] = di
+        # case 2
+        elif l == 2:
+            di = (self.V[Δ, j] + self.W[Δ, k]) / 2
+            self.V[Δ, j] = self.W[Δ, k] = di
+        # case 3
+        elif l == 3:
+            if self.W[Δ,k]-self.V[Δ,j] < self.W[Δ,j]-self.V[Δ,k]:
+                self.V[Δ, j] = self.W[Δ, k]
+            else:
+                self.W[Δ, j] = self.V[Δ, k]
+        # case 4
+        elif l == 4:
+            if self.W[Δ,k]-self.V[Δ,j] < self.W[Δ,j]-self.V[Δ,k]:
+                self.W[Δ, k] = self.V[Δ, j]
+            else:
+                self.V[Δ, k] = self.W[Δ, j]
     # endregion
 
     # region Helper Methods
