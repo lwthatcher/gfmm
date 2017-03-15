@@ -257,7 +257,6 @@ class TestGFMM(TestCase):
         gfmm.W = ex.W[:, :-1]
         gfmm.B_cls = ex.B_cls[:-1]
         gfmm.hboxes = 6
-
         # basic tests to make sure we have the right setup
         self.assertEqual(gfmm.V.shape, (2, 6))
         self.assertEqual(len(gfmm.B_cls), 6)

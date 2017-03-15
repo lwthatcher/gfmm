@@ -129,12 +129,15 @@ class GFMM:
             if V.shape == (1, 2):   # make sure V and W are column vectors
                 V = V.reshape(self.n, 1)
                 W = W.reshape(self.n, 1)
-            # hyperbox Bj
+            # save inverse mask
+            i_mask = np.where(idx)[0]
+            # store hyperbox Bj
             Vj = self.V[:,j].reshape(self.n, 1)
             Wj = self.W[:,j].reshape(self.n, 1)
             # store some other useful variables
             Δ, l, k = self.min_overlap_adjustment(V, W, Vj, Wj)
-            # TODO: convert k back into index relative to self.V/self.W
+            # convert k back from relative index
+            k = i_mask[k]
         return Δ, l, k
 
     def _contraction(self, Δ, l, j, k):
