@@ -124,8 +124,8 @@ class GFMM:
         # if no candidates for overlap, Δ = -1
         if len(idx) > 0:
             # alias for convenience
-            V = self.V[idx]
-            W = self.W[idx]
+            V = self.V[:, idx]
+            W = self.W[:, idx]
             if V.shape == (1, 2):   # make sure V and W are column vectors
                 V = V.reshape(self.n, 1)
                 W = W.reshape(self.n, 1)

@@ -120,12 +120,12 @@ class TestGFMM(TestCase):
         class _EX4:
             def __init__(self):
                 # hyperbox classifications
-                self.B_cls = np.array([2, 1, 1, 2, 1, 3])  # used in d2
+                self.B_cls = np.array([0, 1, 1, 2, 1, 3, 2])
                 # Fig 4.d --with added hyperboxes
-                self.V = np.array([[.3, 0., .1, .4, .9, .4],
-                                   [.6, 0., .1, .3, .9, .8]])
-                self.W = np.array([[.6, .2, .5, .7, 1., .6],
-                                   [.7, .2, .5, .7, 1.1, 1]])
+                self.V = np.array([[0., 0., .1, .4, .9, .4, .3],
+                                   [.9, 0., .1, .3, .9, .8, .6]])
+                self.W = np.array([[.1, .2, .5, .7, 1., .6, .6],
+                                   [1., .2, .5, .7, 1.1, 1, .7]])
                 self.Vj = np.array([[.4], [.3]])
                 self.Wj = np.array([[.7], [.7]])
                 # Filtered out j, and all hyperboxes with class 2
@@ -141,7 +141,7 @@ class TestGFMM(TestCase):
                 # some default gfmm values
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
-                self.gfmm.hboxes = 6
+                self.gfmm.hboxes = 7
                 self.gfmm.B_cls = self.B_cls
                 self.gfmm.V = self.V
                 self.gfmm.W = self.W
@@ -253,16 +253,18 @@ class TestGFMM(TestCase):
         ex = self.EX_4
         gfmm = ex.gfmm
         # remove the overlapping box of the same class for now
-        gfmm.V = ex.V[:, 1:]
-        gfmm.W = ex.W[:, 1:]
-        gfmm.B_cls = ex.B_cls[1:]
-        gfmm.n = 5
+        gfmm.V = ex.V[:, :-1]
+        gfmm.W = ex.W[:, :-1]
+        gfmm.B_cls = ex.B_cls[:-1]
+        gfmm.hboxes = 6
+        # set class(B0) to be 2, so it gets filtered out when passed to min_overlap_adjustment()
+        gfmm.B_cls[0] = 2
         # basic tests to make sure we have the right setup
-        self.assertEqual(gfmm.V.shape, (2, 5))
-        self.assertEqual(len(gfmm.B_cls), 5)
+        self.assertEqual(gfmm.V.shape, (2, 6))
+        self.assertEqual(len(gfmm.B_cls), 6)
         # perform overlap check
-        k = 1  # index of B2
-        j = 2  # index of B3
+        k = 2  # index of B2
+        j = 3  # index of B3
         d = 2  # class(B3)
         dim, l, idx = gfmm._overlap_test(j, d)
         # verify results
@@ -304,7 +306,6 @@ class TestGFMM(TestCase):
         # no changes
         np.testing.assert_array_equal(gfmm.V, ex.Vc)
         np.testing.assert_array_equal(gfmm.W, ex.Wc)
-
     # endregion
 
     def test__initialize(self):
