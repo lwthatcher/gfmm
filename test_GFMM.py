@@ -81,13 +81,6 @@ class TestGFMM(TestCase):
                 # Fig 4.d
                 self.Vd = np.array([[.1, .4], [.1, .3]])
                 self.Wd = np.array([[.5, .7], [.5, .7]])
-                # Fig 4.d with added hyperboxes
-                self.Vd2 = np.array([[.1, .9, .4], [.1, .9, .8]])
-                self.Wd2 = np.array([[.5, 1, .6], [.5, 1.1, 1]])
-                self.Vd2_a = np.array([[.1, .4, .9, .4], [.1, .3, .9, .8]])
-                self.Wd2_a = np.array([[.5, .7, 1, .6], [.5, .7, 1.1, 1]])
-                self.Vd2_j = np.array([[.4], [.3]])
-                self.Wd2_j = np.array([[.7], [.7]])
                 # Fig 4.e
                 self.Ve = np.array([[.1, .45], [.1, .3]])
                 self.We = np.array([[.45, .7], [.5, .7]])
@@ -111,11 +104,48 @@ class TestGFMM(TestCase):
         """
         class _EX2:
             def __init__(self):
-                self.V = np.array([[.1, .3],[.1, .05]])
-                self.W = np.array([[.4, .7],[.4, .35]])
+                self.V = np.array([[.1, .3], [.1, .05]])
+                self.W = np.array([[.4, .7], [.4, .35]])
                 self.Vj = np.array([[.25], [.29]])
                 self.Wj = np.array([[.35], [.38]])
         return _EX2()
+
+    @property
+    def EX_4(self):
+        """
+        A variation on the example illustrated in Fig 4.d from the KnFMM paper
+        Here several hyperboxes have been added, but the original overlap issue
+        should be the same.
+        """
+        class _EX4:
+            def __init__(self):
+                # hyperbox classifications
+                self.B_cls = np.array([2, 1, 1, 2, 1, 3])  # used in d2
+                # Fig 4.d --with added hyperboxes
+                self.V = np.array([[.3, 0., .1, .4, .9, .4],
+                                   [.6, 0., .1, .3, .9, .8]])
+                self.W = np.array([[.6, .2, .5, .7, 1., .6],
+                                   [.7, .2, .5, .7, 1.1, 1]])
+                self.Vj = np.array([[.4], [.3]])
+                self.Wj = np.array([[.7], [.7]])
+                # Filtered out j, and all hyperboxes with class 2
+                self.V_f = np.array([[0., .1, .9, .4],
+                                     [0., .1, .9, .8]])
+                self.W_f = np.array([[.2, .5, 1., .6],
+                                     [.2, .5, 1.1, 1]])
+                # Corrected Overlap Result (based on Fig 4.e)
+                self.Ve = np.array([[.3, 0., .1, .45, .9, .4],
+                                    [.6, 0., .1, .3, .9, .8]])
+                self.We = np.array([[.6, .2, .45, .7, 1., .6],
+                                    [.7, .2, .5, .7, 1.1, 1]])
+                # some default gfmm values
+                self.gfmm = GFMM()
+                self.gfmm.n = 2
+                self.gfmm.hboxes = 6
+                self.gfmm.B_cls = self.B_cls
+                self.gfmm.V = self.V
+                self.gfmm.W = self.W
+        return _EX4()
     # endregion
 
     def test_fit(self):
@@ -219,7 +249,11 @@ class TestGFMM(TestCase):
         self.assertEqual(d, 0)
         self.assertEqual(l, 2)
 
-    def test_overlap_test__k(self):
+    def test_overlap_test__index_k(self):
+        # TODO: implement
+        self.fail("test not implemented")
+
+    def test_overlap_test__ignore_same_class(self):
         # TODO: implement
         self.fail("test not implemented")
     # endregion
@@ -230,13 +264,21 @@ class TestGFMM(TestCase):
         gfmm = ex.gfmm
         gfmm.V = ex.Vd
         gfmm.W = ex.Wd
+        # KnFMM Fig 4.d -> Fig 4.e
         gfmm._contraction(0, 2, 1, 0)
         np.testing.assert_array_equal(gfmm.V, ex.Ve)
         np.testing.assert_array_equal(gfmm.W, ex.We)
 
     def test_contraction__no_overlap(self):
-        # TODO: implement
-        self.fail("test not implemented")
+        ex = self.EX_1
+        gfmm = ex.gfmm
+        gfmm.V = ex.Vc
+        gfmm.W = ex.Wc
+        gfmm._contraction(0, 2, 1, 0)
+        # no changes
+        np.testing.assert_array_equal(gfmm.V, ex.Vc)
+        np.testing.assert_array_equal(gfmm.W, ex.Wc)
+
     # endregion
 
     def test__initialize(self):
@@ -339,11 +381,11 @@ class TestGFMM(TestCase):
         np.testing.assert_array_equal(gfmm.W, ex.Wc)
 
     def test__min_overlap_adjustment(self):
-        ex = self.EX_1
-        d, l, k = GFMM.min_overlap_adjustment(ex.Vd2, ex.Wd2, ex.Vd2_j, ex.Wd2_j)
+        ex = self.EX_4
+        d, l, k = GFMM.min_overlap_adjustment(ex.V_f, ex.W_f, ex.Vj, ex.Wj)
         self.assertEqual(d, 0)  # dimension 0 (zero-indexed)
         self.assertEqual(l, 2)  # case 2 (one-indexed)
-        self.assertEqual(k, 0)  # first hyperbox (zero-indexed)
+        self.assertEqual(k, 1)  # hyperbox 2, but second entry in V_f (zero-indexed)
         ex = self.EX_3
         d, l, k = GFMM.min_overlap_adjustment(ex.V, ex.W, ex.Vj, ex.Wj)
         self.assertEqual(d, 0)  # dimension 0 (zero-indexed)
