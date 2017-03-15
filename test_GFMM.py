@@ -240,22 +240,48 @@ class TestGFMM(TestCase):
         # KnFMM Fig 4.c (no overlap)
         gfmm.V = ex.Vc
         gfmm.W = ex.Wc
-        d, l, k = gfmm._overlap_test(1, 2)
-        self.assertEqual(d, -1)
+        dim, l, k = gfmm._overlap_test(1, 2)
+        self.assertEqual(dim, -1)
         # KnFMM Fig 4.d (overlap)
         gfmm.V = ex.Vd
         gfmm.W = ex.Wd
-        d, l, k = gfmm._overlap_test(1, 2)
-        self.assertEqual(d, 0)
+        dim, l, k = gfmm._overlap_test(1, 2)
+        self.assertEqual(dim, 0)
         self.assertEqual(l, 2)
 
-    def test_overlap_test__index_k(self):
-        # TODO: implement
-        self.fail("test not implemented")
+    def test_overlap_test__index_k_relative_to_original(self):
+        ex = self.EX_4
+        gfmm = ex.gfmm
+        # remove the overlapping box of the same class for now
+        gfmm.V = ex.V[:, 1:]
+        gfmm.W = ex.W[:, 1:]
+        gfmm.B_cls = ex.B_cls[1:]
+        gfmm.n = 5
+        # basic tests to make sure we have the right setup
+        self.assertEqual(gfmm.V.shape, (2, 5))
+        self.assertEqual(len(gfmm.B_cls), 5)
+        # perform overlap check
+        k = 1  # index of B2
+        j = 2  # index of B3
+        d = 2  # class(B3)
+        dim, l, idx = gfmm._overlap_test(j, d)
+        # verify results
+        self.assertEqual(dim, 0)  # dimension 0 (i.e. x)
+        self.assertEqual(l, 2)    # case 2
+        self.assertEqual(idx, k)  # overlaps with hyperbox B2
 
     def test_overlap_test__ignore_same_class(self):
-        # TODO: implement
-        self.fail("test not implemented")
+        ex = self.EX_4
+        gfmm = ex.gfmm
+        # perform overlap check
+        k = 2  # index of B2
+        j = 3  # index of B3
+        d = 2  # class(B3)
+        dim, l, idx = gfmm._overlap_test(j, d)
+        # verify results
+        self.assertEqual(dim, 0)  # dimension 0 (i.e. x)
+        self.assertEqual(l, 2)    # case 2
+        self.assertEqual(idx, k)  # overlaps with B2, ignore B0
     # endregion
 
     # region Contraction
