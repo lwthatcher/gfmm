@@ -120,12 +120,12 @@ class TestGFMM(TestCase):
         class _EX4:
             def __init__(self):
                 # hyperbox classifications
-                self.B_cls = np.array([0, 1, 1, 2, 1, 3, 2])
+                self.B_cls = np.array([2, 1, 1, 2, 1, 3, 2])
                 # Fig 4.d --with added hyperboxes
                 self.V = np.array([[0., 0., .1, .4, .9, .4, .3],
-                                   [.9, 0., .1, .3, .9, .8, .6]])
-                self.W = np.array([[.1, .2, .5, .7, 1., .6, .6],
-                                   [1., .2, .5, .7, 1.1, 1, .7]])
+                                   [.9, 0., .1, .3, .9, .8, .65]])
+                self.W = np.array([[.1, .2, .5, .7, 1., .6, .65],
+                                   [1., .2, .5, .7, 1.1, 1., .7]])
                 self.Vj = np.array([[.4], [.3]])
                 self.Wj = np.array([[.7], [.7]])
                 # Filtered out j, and all hyperboxes with class 2
@@ -257,8 +257,7 @@ class TestGFMM(TestCase):
         gfmm.W = ex.W[:, :-1]
         gfmm.B_cls = ex.B_cls[:-1]
         gfmm.hboxes = 6
-        # set class(B0) to be 2, so it gets filtered out when passed to min_overlap_adjustment()
-        gfmm.B_cls[0] = 2
+
         # basic tests to make sure we have the right setup
         self.assertEqual(gfmm.V.shape, (2, 6))
         self.assertEqual(len(gfmm.B_cls), 6)
@@ -275,6 +274,8 @@ class TestGFMM(TestCase):
     def test_overlap_test__ignore_same_class(self):
         ex = self.EX_4
         gfmm = ex.gfmm
+        # set class(B0) to be 3, so it is not filtered out when passed to min_overlap_adjustment()
+        gfmm.B_cls[0] = 3
         # perform overlap check
         k = 2  # index of B2
         j = 3  # index of B3
@@ -283,7 +284,7 @@ class TestGFMM(TestCase):
         # verify results
         self.assertEqual(dim, 0)  # dimension 0 (i.e. x)
         self.assertEqual(l, 2)    # case 2
-        self.assertEqual(idx, k)  # overlaps with B2, ignore B0
+        self.assertEqual(idx, k)  # overlaps with B2, ignore B6
     # endregion
 
     # region Contraction
