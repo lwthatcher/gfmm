@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from gfmm.gfmm import GFMM
+from gfmm import GFMM
 
 
 class TestGFMM(TestCase):
