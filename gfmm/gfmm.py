@@ -11,10 +11,6 @@ class GFMM:
         if membership_func is None:
             membership_func = membership.FuzzyMembershipFunction
         self.mfunc = membership_func(self)
-        # initial input min/max arrays
-        # TODO: don't store training data
-        self.X_l = np.zeros((0, 0))
-        self.X_u = np.zeros((0, 0))
         # number of dimensions
         # TODO: lazy initialization of some of these?
         self.n = 0
@@ -42,12 +38,12 @@ class GFMM:
         input_length = X.shape[0]
         # TODO: initialize only once option?
         # TODO: if Y is not set, default to clustering
-        self._initialize(X)
+        X_l, X_u = self._initialize(X)
         out = []
         # TODO: add multi-epoch support
         for h in range(input_length):
-            xl = self.X_l[h, :]
-            xu = self.X_u[h, :]
+            xl = X_l[h, :]
+            xu = X_u[h, :]
             d = Y[h]
             j, ď, exp = self._expansion(xl, xu, d)
             out.append(ď)
@@ -191,14 +187,17 @@ class GFMM:
         This is typically called from the .fit( ) method
         :param X: array-like, size=[n_samples, n_features]
             The training data
+        :return: tuple (X_l, X_u)
+            X_l: The min value for each training instance.
+            X_u: The max value for each training instance.
         """
         # input matrices: Xl, Xu
         if len(X.shape) >= 3 and X.shape[2] >= 2:
-            self.X_l = X[:, :, 0]
-            self.X_u = X[:, :, 1]
+            X_l = X[:, :, 0]
+            X_u = X[:, :, 1]
         else:
-            self.X_l = X
-            self.X_u = np.copy(X)
+            X_l = X
+            X_u = np.copy(X)
         # set num dimensions
         self.n = X.shape[1]
         # initially no hyperboxes
@@ -207,6 +206,7 @@ class GFMM:
         # initialize hyperbox matrices
         self.V = np.zeros((self.n, 0))
         self.W = np.zeros((self.n, 0))
+        return X_l, X_u
 
     def _expand(self, j, xl, xu):
         """

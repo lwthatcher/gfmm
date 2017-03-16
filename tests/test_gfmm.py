@@ -20,10 +20,6 @@ class TestGFMM(TestCase):
                    [[.4, .45], [.3, .35]]])
     d2 = np.array([1, 2, 1, 2])
 
-    # run before each
-    def setUp(self):
-        self.gfmm = GFMM()
-
     # region Examples
     @property
     def CASE_STUDY_I(self):
@@ -323,29 +319,29 @@ class TestGFMM(TestCase):
         self.assertEqual(self.gfmm.n, 0)
         self.assertEqual(self.gfmm.hboxes, 0)
         # 3 dims, 3 examples
-        self.gfmm._initialize(self.X1)
+        X_l, X_u = self.gfmm._initialize(self.X1)
         self.assertEqual(self.gfmm.V.shape, (3, 0))
         self.assertEqual(self.gfmm.W.shape, (3, 0))
         self.assertEqual(self.gfmm.n, 3)
         self.assertEqual(self.gfmm.hboxes, 0)
-        self.assertEqual(self.gfmm.X_l[0, 0], 1)
-        self.assertEqual(self.gfmm.X_u[0, 0], 1)
+        self.assertEqual(X_l[0, 0], 1)
+        self.assertEqual(X_u[0, 0], 1)
         # 2 dims, 4 examples
-        self.gfmm._initialize(self.X2)
+        X_l, X_u = self.gfmm._initialize(self.X2)
         self.assertEqual(self.gfmm.V.shape, (2, 0))
         self.assertEqual(self.gfmm.W.shape, (2, 0))
         self.assertEqual(self.gfmm.n, 2)
         self.assertEqual(self.gfmm.hboxes, 0)
-        self.assertEqual(self.gfmm.X_l[0, 0], .1)
-        self.assertEqual(self.gfmm.X_u[0, 0], .1)
+        self.assertEqual(X_l[0, 0], .1)
+        self.assertEqual(X_u[0, 0], .1)
         # set with different min/max values
-        self.gfmm._initialize(self.X3)
+        X_l, X_u = self.gfmm._initialize(self.X3)
         self.assertEqual(self.gfmm.V.shape, (2, 0))
         self.assertEqual(self.gfmm.W.shape, (2, 0))
         self.assertEqual(self.gfmm.n, 2)
         self.assertEqual(self.gfmm.hboxes, 0)
-        self.assertEqual(self.gfmm.X_l[0, 0], .1)
-        self.assertEqual(self.gfmm.X_u[0, 0], .15)
+        self.assertEqual(X_l[0, 0], .1)
+        self.assertEqual(X_u[0, 0], .15)
 
     def test__add_hyperbox(self):
         # initially none
@@ -447,3 +443,6 @@ class TestGFMM(TestCase):
         self.assertEqual(l, 1)  # case 1 (one-indexed)
         self.assertEqual(k, 1)  # second hyperbox (zero-indexed)
 
+    # run before each
+    def setUp(self):
+        self.gfmm = GFMM()
