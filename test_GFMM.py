@@ -91,6 +91,8 @@ class TestGFMM(TestCase):
                 self.a2 = np.array([.7, .7])
                 self.a3 = np.array([.5, .5])
                 self.a4 = np.array([.4, .3])
+                self.X = np.array([self.a1, self.a2, self.a3, self.a4])
+                self.d = np.array([1, 2, 1, 2])
         return _EX1()
 
     @property
@@ -156,16 +158,15 @@ class TestGFMM(TestCase):
     # endregion
 
     def test_fit(self):
-        Vf = np.array([[.1, .45],
-                       [.1, .3]])
-        Wf = np.array([[.45, .7],
-                       [.5, .7]])
-        self.gfmm.fit(self.X2, self.d2)
-        self.assertEqual(self.gfmm.V.shape, (2, 2))
-        self.assertEqual(self.gfmm.W.shape, (2, 2))
-        self.assertEqual(self.gfmm.hboxes, 2)
-        np.testing.assert_array_equal(self.gfmm.V, Vf)
-        np.testing.assert_array_equal(self.gfmm.W, Wf)
+        ex = self.EX_1
+        gfmm = GFMM()
+        gfmm.ϴ = .4
+        gfmm.fit(ex.X, ex.d)
+        self.assertEqual(gfmm.V.shape, (2, 2))
+        self.assertEqual(gfmm.W.shape, (2, 2))
+        self.assertEqual(gfmm.hboxes, 2)
+        np.testing.assert_array_equal(gfmm.V, ex.Ve)
+        np.testing.assert_array_equal(gfmm.W, ex.We)
 
     # region Expansion
     def test_expansion(self):
