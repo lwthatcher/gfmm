@@ -1,6 +1,8 @@
 from unittest import TestCase
-from GFMM import GFMM
+
 import numpy as np
+
+from gfmm.GFMM import GFMM
 
 
 class TestGFMM(TestCase):

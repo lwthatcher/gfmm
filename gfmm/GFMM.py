@@ -1,5 +1,6 @@
 import numpy as np
-import membership
+
+from gfmm import membership
 
 
 class GFMM:

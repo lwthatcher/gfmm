@@ -1,7 +1,9 @@
 from unittest import TestCase
-from GFMM import GFMM
-import membership
+
 import numpy as np
+
+from gfmm import membership
+from gfmm.GFMM import GFMM
 
 
 class TestMembershipFunctions(TestCase):
