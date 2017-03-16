@@ -3,7 +3,7 @@ from unittest import TestCase
 import numpy as np
 
 from gfmm import membership
-from gfmm.GFMM import GFMM
+from gfmm.gfmm import GFMM
 
 
 class TestMembershipFunctions(TestCase):
