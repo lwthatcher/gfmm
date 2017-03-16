@@ -66,12 +66,14 @@ class TestGFMM(TestCase):
             def __init__(self):
                 # hyperbox classifications
                 self.B_cls = np.array([1, 2])  # default
-                self.d2_cls = np.array([1, 2, 1, 3])  # used in d2
                 # some default gfmm values
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
                 self.gfmm.hboxes = 2
                 self.gfmm.B_cls = self.B_cls
+                # Fig 4.a
+                self.Va = np.array([[.1], [.1]])
+                self.Wa = np.array([[.1], [.1]])
                 # Fig 4.b
                 self.Vb = np.array([[.1, .7], [.1, .7]])
                 self.Wb = np.array([[.1, .7], [.1, .7]])
@@ -84,6 +86,11 @@ class TestGFMM(TestCase):
                 # Fig 4.e
                 self.Ve = np.array([[.1, .45], [.1, .3]])
                 self.We = np.array([[.45, .7], [.5, .7]])
+                # input values
+                self.a1 = np.array([.1, .1])
+                self.a2 = np.array([.7, .7])
+                self.a3 = np.array([.5, .5])
+                self.a4 = np.array([.4, .3])
         return _EX1()
 
     @property
@@ -402,10 +409,28 @@ class TestGFMM(TestCase):
         gfmm = ex.gfmm
         gfmm.V = ex.Vb
         gfmm.W = ex.Wb
-        a3 = np.array([.5, .5])
-        gfmm._expand(0, a3, a3)
+        exp = gfmm._expand(0, ex.a3, ex.a3)
         np.testing.assert_array_equal(gfmm.V, ex.Vc)
         np.testing.assert_array_equal(gfmm.W, ex.Wc)
+        self.assertTrue(exp)
+
+    def test__expand__no_expansion(self):
+        ex = self.EX_1
+        gfmm = ex.gfmm
+        gfmm.V = ex.Vc
+        gfmm.W = ex.Wc
+        # point within hyperbox
+        a = np.array([.3, .3])
+        exp = gfmm._expand(0, a, a)
+        np.testing.assert_array_equal(gfmm.V, ex.Vc)
+        np.testing.assert_array_equal(gfmm.W, ex.Wc)
+        self.assertFalse(exp)
+        # min/max value within hyperbox
+        b = np.array([.35, .4])
+        exp = gfmm._expand(0, a, b)
+        np.testing.assert_array_equal(gfmm.V, ex.Vc)
+        np.testing.assert_array_equal(gfmm.W, ex.Wc)
+        self.assertFalse(exp)
 
     def test__min_overlap_adjustment(self):
         ex = self.EX_4
