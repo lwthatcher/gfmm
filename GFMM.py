@@ -5,14 +5,17 @@ import membership
 class GFMM:
 
     def __init__(self, membership_func=None):
+        # TODO: add argument parsing
         # membership function
         if membership_func is None:
             membership_func = membership.FuzzyMembershipFunction
         self.mfunc = membership_func(self)
         # initial input min/max arrays
+        # TODO: don't store training data
         self.X_l = np.zeros((0, 0))
         self.X_u = np.zeros((0, 0))
         # number of dimensions
+        # TODO: lazy initialization of some of these?
         self.n = 0
         # number of hyperboxes
         self.hboxes = 0
@@ -24,6 +27,7 @@ class GFMM:
         self.φ = 0.9
         # K-nearest neighbors to retrieve for expansion
         self.Kn = 10
+        # TODO: add variables: p (# of output classes), ϴ_min
 
     # region Public Methods
     def fit(self, X, Y):
@@ -36,9 +40,10 @@ class GFMM:
         """
         input_length = X.shape[0]
         # TODO: initialize only once option?
+        # TODO: if Y is not set, default to clustering
         self._initialize(X)
         out = []
-
+        # TODO: add multi-epoch support
         for h in range(input_length):
             xl = self.X_l[h, :]
             xu = self.X_u[h, :]
@@ -49,8 +54,11 @@ class GFMM:
                 Δ, l, k = self._overlap_test(j, ď)
                 self._contraction(Δ, l, j, k)
         return out
+        # TODO: add stopping criteria
+        # TODO: add φ*ϴ update
 
     def predict(self, X):
+        # TODO: implement
         pass
     # endregion
 
