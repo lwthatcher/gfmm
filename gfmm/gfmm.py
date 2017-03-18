@@ -209,12 +209,7 @@ class GFMM:
             X_u: The max value for each training instance.
         """
         # input matrices: Xl, Xu
-        if len(X.shape) >= 3 and X.shape[2] >= 2:
-            X_l = X[:, :, 0]
-            X_u = X[:, :, 1]
-        else:
-            X_l = X
-            X_u = np.copy(X)
+        X_l, X_u = self.splice_matrix(X)
         # if no output classes, initialize to all zeros
         if Y is None:
             n_samples = X.shape[0]
