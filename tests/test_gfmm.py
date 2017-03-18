@@ -70,6 +70,7 @@ class TestGFMM(TestCase):
                 self.gfmm.n = 2
                 self.gfmm.hboxes = 2
                 self.gfmm.p = 2
+                self.gfmm.ϴ = .4
                 self.gfmm.B_cls = self.B_cls
                 # Fig 4.a
                 self.Va = np.array([[.1], [.1]])
@@ -96,6 +97,15 @@ class TestGFMM(TestCase):
                 # expected U matrix
                 self.U = np.array([[0, 1, 0],
                                    [0, 0, 1]])
+                # sample prediction values
+                self.p1 = np.array([.3, .3])
+                self.p2 = np.array([.6, .6])
+                self.p3 = np.array([.5, .4])
+                self.p4 = np.array([.1, .6])
+                self.p5 = np.array([0, 0])
+                self.p6 = np.array([.9, .9])
+                self.P = np.array([self.p1, self.p2, self.p3, self.p4, self.p5, self.p6])
+                self.Z = np.array([1, 2, 2, 1, 1, 2])
         return _EX1()
 
     @property
@@ -169,16 +179,27 @@ class TestGFMM(TestCase):
         return _EX4()
     # endregion
 
+    # region Public Methods
     def test_fit(self):
         ex = self.EX_1
-        gfmm = GFMM()
-        gfmm.ϴ = .4
+        gfmm = GFMM(theta=.4)
         gfmm.fit(ex.X, ex.d)
         self.assertEqual(gfmm.V.shape, (2, 2))
         self.assertEqual(gfmm.W.shape, (2, 2))
         self.assertEqual(gfmm.hboxes, 2)
         np.testing.assert_array_equal(gfmm.V, ex.Ve)
         np.testing.assert_array_equal(gfmm.W, ex.We)
+
+    def test_predict(self):
+        ex = self.EX_1
+        gfmm = ex.gfmm
+        gfmm.V = ex.Ve
+        gfmm.W = ex.We
+        z = gfmm.predict(ex.P)
+        z = np.array(z)
+        self.assertEqual(len(z), 6)  # should classify six examples
+        np.testing.assert_array_equal(z, ex.Z)  # verify it matches expected outputs
+    # endregion
 
     # region Expansion
     def test_expansion(self):

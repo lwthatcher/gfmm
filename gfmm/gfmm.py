@@ -62,8 +62,15 @@ class GFMM:
         # TODO: add φ*ϴ update
 
     def predict(self, X):
+        """
+        Predicts the classification from the supplied samples.
+        :param X: array-like, size=[n_samples, n_features]
+            The feature vectors for the samples to predict.
+        :return: array-like, size=[n_samples]
+            The predicted classification results of the given array.
+        """
         # TODO: implement
-        pass
+        return None
     # endregion
 
     # region Pipeline
