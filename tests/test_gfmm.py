@@ -93,6 +93,9 @@ class TestGFMM(TestCase):
                 self.a4 = np.array([.4, .3])
                 self.X = np.array([self.a1, self.a2, self.a3, self.a4])
                 self.d = np.array([1, 2, 1, 2])
+                # expected U matrix
+                self.U = np.array([[0, 1, 0],
+                                   [0, 0, 1]])
         return _EX1()
 
     @property
@@ -457,6 +460,11 @@ class TestGFMM(TestCase):
     # endregion
 
     def test_U(self):
+        # m = 2, p = 2
+        ex = self.EX_1
+        gfmm = ex.gfmm
+        np.testing.assert_array_equal(gfmm.U, ex.U)
+        # m = 7, p = 3
         ex = self.EX_4
         gfmm = ex.gfmm
         np.testing.assert_array_equal(gfmm.U, ex.U)
