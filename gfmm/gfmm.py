@@ -374,6 +374,10 @@ class GFMM:
         idx = np.argpartition(d, -k)[::-1]  # indices for first k which are top k, not necessarily in order
         s_idx = np.argsort(d[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx
         return idx[s_idx]  # returns indices for top k, in sorted order
+
+    @property
+    def U(self):
+        return None
     # endregion
 
     if __name__ == "__main__":

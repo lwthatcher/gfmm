@@ -145,6 +145,14 @@ class TestGFMM(TestCase):
                                     [.6, 0., .1, .3, .9, .8]])
                 self.We = np.array([[.6, .2, .45, .7, 1., .6],
                                     [.7, .2, .5, .7, 1.1, 1]])
+                # Expected U-matrix
+                self.U = np.array([[0, 0, 1, 0],
+                                   [0, 1, 0, 0],
+                                   [0, 1, 0, 0],
+                                   [0, 0, 1, 0],
+                                   [0, 1, 0, 0],
+                                   [0, 0, 0, 1],
+                                   [0, 0, 1, 0]])
                 # some default gfmm values
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
@@ -343,6 +351,7 @@ class TestGFMM(TestCase):
         self.assertEqual(X_l[0, 0], .1)
         self.assertEqual(X_u[0, 0], .15)
 
+    # region Helper Methods
     def test__add_hyperbox(self):
         # initially none
         self.gfmm._initialize(self.X2)
@@ -442,6 +451,12 @@ class TestGFMM(TestCase):
         self.assertEqual(d, 0)  # dimension 0 (zero-indexed)
         self.assertEqual(l, 1)  # case 1 (one-indexed)
         self.assertEqual(k, 1)  # second hyperbox (zero-indexed)
+    # endregion
+
+    def test_U(self):
+        ex = self.EX_4
+        gfmm = ex.gfmm
+        np.testing.assert_array_equal(gfmm.U, ex.U)
 
     # run before each
     def setUp(self):
