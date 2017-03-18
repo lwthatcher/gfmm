@@ -43,7 +43,6 @@ class GFMM:
             Returns the predicted output for each item in the input data.
         """
         input_length = X.shape[0]
-        # TODO: initialize only once option?
         # TODO: if Y is not set, default to clustering
         X_l, X_u = self._initialize(X, Y, wipe)
         out = []
@@ -194,7 +193,7 @@ class GFMM:
                 self.V[Δ, k] = self.W[Δ, j]
     # endregion
 
-    # region Helper Methods
+    # region Initialization Methods
     def _initialize(self, X, Y=None, wipe=False):
         """
         Initializes internal values and matrices from the input matrix
@@ -236,7 +235,9 @@ class GFMM:
             self.V = np.zeros((self.n, 0))
             self.W = np.zeros((self.n, 0))
         return X_l, X_u
+    # endregion
 
+    # region Helper Methods
     def _expand(self, j, xl, xu):
         """
         Expands the j'th hyperbox to fit the provided data
@@ -328,7 +329,9 @@ class GFMM:
         dim_sizes = W_max - V_min
         result = np.all(dim_sizes <= self.ϴ, 0)
         return idx[result]
+    # endregion
 
+    # region Static Methods
     @staticmethod
     def min_overlap_adjustment(V, W, Vj, Wj):
         """
@@ -396,6 +399,12 @@ class GFMM:
         s_idx = np.argsort(d[idx[:k]])[::-1]  # the k sorted indices for M, relative to idx
         return idx[s_idx]  # returns indices for top k, in sorted order
 
+    @staticmethod
+    def splice_matrix(X, depth=2):
+        pass
+    # endregion
+
+    # region Properties
     @property
     def U(self):
         u = np.zeros((self.hboxes, self.p+1))   # m*p boolean matrix
