@@ -196,7 +196,6 @@ class TestGFMM(TestCase):
         gfmm.V = ex.Ve
         gfmm.W = ex.We
         z = gfmm.predict(ex.P)
-        z = np.array(z)
         self.assertEqual(len(z), 6)  # should classify six examples
         np.testing.assert_array_equal(z, ex.Z)  # verify it matches expected outputs
     # endregion

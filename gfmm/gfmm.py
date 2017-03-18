@@ -68,8 +68,18 @@ class GFMM:
         :return: array-like, size=[n_samples]
             The predicted classification results of the given array.
         """
-        # TODO: implement
-        return None
+        X_l, X_u = self.splice_matrix(X)
+        input_length = X.shape[0]
+        U = self.U
+        out = []
+        for h in range(input_length):
+            xl = X_l[h, :]
+            xu = X_u[h, :]
+            Bh = self.m_func(xl, xu)
+            totals = Bh.dot(U)
+            cls = np.argmax(totals)
+            out.append(cls)
+        return np.array(out)
     # endregion
 
     # region Pipeline
