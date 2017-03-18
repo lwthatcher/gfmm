@@ -18,10 +18,6 @@ class TestGFMM(TestCase):
                    [[.7, .75], [.7, .75]],
                    [[.5, .55], [.5, .55]],
                    [[.4, .45], [.3, .35]]])
-    X4 = np.array([[[.1, .1], [.1, .1]],
-                   [[.7, .7], [.7, .7]],
-                   [[.5, .5], [.5, .5]],
-                   [[.4, .4], [.3, .3]]])
     d2 = np.array([1, 2, 1, 2])
 
     # region Examples
@@ -488,12 +484,12 @@ class TestGFMM(TestCase):
     def test__splice_matrix(self):
         # needs splicing
         Xl, Xu = GFMM.splice_matrix(self.X2)
-        result = np.array([Xl, Xu])
-        np.testing.assert_array_equal(result, self.X4)
+        np.testing.assert_array_equal(Xl, self.X2)
+        np.testing.assert_array_equal(Xu, self.X2)
         # doesn't need splicing
         Xl, Xu = GFMM.splice_matrix(self.X3)
-        result = np.array([Xl, Xu])
-        np.testing.assert_array_equal(result, self.X3)
+        np.testing.assert_array_equal(Xl, self.X3[:,:,0])
+        np.testing.assert_array_equal(Xu, self.X3[:,:,1])
     # endregion
 
     # region Properties

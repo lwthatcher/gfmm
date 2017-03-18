@@ -401,7 +401,23 @@ class GFMM:
 
     @staticmethod
     def splice_matrix(X, depth=2):
-        pass
+        """
+        Splits the matrix X into X_l and X_u,
+        where X_l is the lower bound and X_u is the upper bound.
+        If the input matrix is of shape=[n_samples, n_features, depth]
+        then it is assumed that X[:,:,0] = X_l, and X[:,:,1] = X_u.
+        :param X: array-like, size=[n_samples, n_features(, depth)]
+        :param depth: int
+            Default: 2 (not actually expected to be used yet...)
+        :return: X_l, X_u
+        """
+        if len(X.shape) >= 3 and X.shape[2] >= depth:
+            X_l = X[:, :, 0]
+            X_u = X[:, :, 1]
+        else:
+            X_l = X
+            X_u = np.copy(X)
+        return X_l, X_u
     # endregion
 
     # region Properties
