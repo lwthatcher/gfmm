@@ -46,6 +46,7 @@ class TestGFMM(TestCase):
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
                 self.gfmm.hboxes = 3
+                self.gfmm.p = 2
                 self.gfmm.V = np.copy(self.Va)
                 self.gfmm.W = np.copy(self.Wa)
                 self.gfmm.B_cls = np.array([1, 2, 1])
@@ -68,6 +69,7 @@ class TestGFMM(TestCase):
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
                 self.gfmm.hboxes = 2
+                self.gfmm.p = 2
                 self.gfmm.B_cls = self.B_cls
                 # Fig 4.a
                 self.Va = np.array([[.1], [.1]])
@@ -156,6 +158,7 @@ class TestGFMM(TestCase):
                 # some default gfmm values
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
+                self.gfmm.p = 3
                 self.gfmm.hboxes = 7
                 self.gfmm.B_cls = self.B_cls
                 self.gfmm.V = self.V

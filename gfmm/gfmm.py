@@ -5,7 +5,7 @@ from gfmm.membership import FuzzyMembershipFunction
 
 class GFMM:
 
-    def __init__(self, m_func=None, gamma=1, n=None, Kn=10, theta=0.3, phi=0.9):
+    def __init__(self, m_func=None, gamma=1, n=None, p=None, Kn=10, theta=0.3, phi=0.9):
         # TODO: add argument parsing
         # membership function
         if m_func is None:
@@ -25,10 +25,12 @@ class GFMM:
         self.φ = phi
         # K-nearest neighbors to retrieve for expansion
         self.Kn = Kn
-        # TODO: add variables: p (# of output classes), ϴ_min
+        # number of output classifications
+        self.p = p
+        # TODO: add variables:, ϴ_min
 
     # region Public Methods
-    def fit(self, X, Y, wipe=False):
+    def fit(self, X, Y=None, wipe=False):
         """
         :param X: array-like, size=[n_samples, n_features]
             Training Data
@@ -43,7 +45,7 @@ class GFMM:
         input_length = X.shape[0]
         # TODO: initialize only once option?
         # TODO: if Y is not set, default to clustering
-        X_l, X_u = self._initialize(X, wipe)
+        X_l, X_u = self._initialize(X, Y, wipe)
         out = []
         # TODO: add multi-epoch support
         for h in range(input_length):
@@ -186,12 +188,16 @@ class GFMM:
     # endregion
 
     # region Helper Methods
-    def _initialize(self, X, wipe=False):
+    def _initialize(self, X, Y=None, wipe=False):
         """
         Initializes internal values and matrices from the input matrix
         This is typically called from the .fit( ) method
         :param X: array-like, size=[n_samples, n_features]
             The training data
+        :param Y: array-like or None, size=[n_samples]
+            The classification labels corresponding to the input.
+            Note that y[i] == 0 corresponds to no label.
+            If y is None, it is initialized to all zeros.
         :return: tuple (X_l, X_u)
             X_l: The min value for each training instance.
             X_u: The max value for each training instance.
@@ -203,6 +209,14 @@ class GFMM:
         else:
             X_l = X
             X_u = np.copy(X)
+        # if no output classes, initialize to all zeros
+        if Y is None:
+            n_samples = X.shape[0]
+            Y = np.zeros(n_samples)
+        # make sure p is set
+        if wipe or self.p is None:
+            print("inferring p: number of output classes")
+            self.p = Y.max()
         # set num dimensions
         if wipe or self.n is None:
             self.n = X.shape[1]
@@ -210,7 +224,7 @@ class GFMM:
         if wipe:
             self.hboxes = 0
             self.B_cls = np.array([])
-        # initialize hyperbox matrices
+        # initialize or reset hyperbox matrices
         if wipe or self.V is None:
             self.V = np.zeros((self.n, 0))
             self.W = np.zeros((self.n, 0))
@@ -377,7 +391,10 @@ class GFMM:
 
     @property
     def U(self):
-        return None
+        u = np.zeros((self.hboxes, self.p+1))   # m*p boolean matrix
+        Bi = np.where(self.B_cls)[0]    # get the indices for B_cls
+        u[Bi, self.B_cls] = 1   # if Bj is a hyperbox for class Ci, then Uij = 1
+        return u
     # endregion
 
     if __name__ == "__main__":
