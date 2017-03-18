@@ -1,44 +1,49 @@
 import numpy as np
 
-from gfmm import membership
+from gfmm.membership import FuzzyMembershipFunction
 
 
 class GFMM:
 
-    def __init__(self, membership_func=None):
+    def __init__(self, m_func=None, gamma=1, n=None, Kn=10, theta=0.3, phi=0.9):
         # TODO: add argument parsing
         # membership function
-        if membership_func is None:
-            membership_func = membership.FuzzyMembershipFunction
-        self.mfunc = membership_func(self)
+        if m_func is None:
+            m_func = FuzzyMembershipFunction
+        self.m_func = m_func(self, gamma)
         # number of dimensions
-        # TODO: lazy initialization of some of these?
-        self.n = 0
+        self.n = n
         # number of hyperboxes
         self.hboxes = 0
         # classes of hyperboxes
         self.B_cls = np.array([])
+        self.V = None
+        self.W = None
         # max size of hyperboxes
-        self.ϴ = 0.1
+        self.ϴ = theta
         # speed of decrease of ϴ
-        self.φ = 0.9
+        self.φ = phi
         # K-nearest neighbors to retrieve for expansion
-        self.Kn = 10
+        self.Kn = Kn
         # TODO: add variables: p (# of output classes), ϴ_min
 
     # region Public Methods
-    def fit(self, X, Y):
+    def fit(self, X, Y, wipe=False):
         """
         :param X: array-like, size=[n_samples, n_features]
             Training Data
         :param Y: array-like, dtype=float64, size=[n_samples]
             Target Values
             note that d=0 corresponds to an unlabeled item
+        :param wipe: boolean
+            If true, erases previous learned data. Default = False.
+        :return: array, size=[n_samples]
+            Returns the predicted output for each item in the input data.
         """
         input_length = X.shape[0]
         # TODO: initialize only once option?
         # TODO: if Y is not set, default to clustering
-        X_l, X_u = self._initialize(X)
+        X_l, X_u = self._initialize(X, wipe)
         out = []
         # TODO: add multi-epoch support
         for h in range(input_length):
@@ -82,7 +87,7 @@ class GFMM:
         if self.hboxes == 0:
             ď = self._add_hyperbox(xl, xu, d)
             return -1, ď, False
-        degree = self.mfunc(xl, xu)
+        degree = self.m_func(xl, xu)
         # idx: ordered list of indices corresponding to candidate hyperboxes to expand
         idx = self.k_best(degree, self.Kn)
         if len(idx) > 0:
@@ -181,7 +186,7 @@ class GFMM:
     # endregion
 
     # region Helper Methods
-    def _initialize(self, X):
+    def _initialize(self, X, wipe=False):
         """
         Initializes internal values and matrices from the input matrix
         This is typically called from the .fit( ) method
@@ -199,13 +204,16 @@ class GFMM:
             X_l = X
             X_u = np.copy(X)
         # set num dimensions
-        self.n = X.shape[1]
-        # initially no hyperboxes
-        self.hboxes = 0
-        self.B_cls = np.array([])
+        if wipe or self.n is None:
+            self.n = X.shape[1]
+        # if wipe is set, set # of hyperboxes to zero
+        if wipe:
+            self.hboxes = 0
+            self.B_cls = np.array([])
         # initialize hyperbox matrices
-        self.V = np.zeros((self.n, 0))
-        self.W = np.zeros((self.n, 0))
+        if wipe or self.V is None:
+            self.V = np.zeros((self.n, 0))
+            self.W = np.zeros((self.n, 0))
         return X_l, X_u
 
     def _expand(self, j, xl, xu):

@@ -316,7 +316,7 @@ class TestGFMM(TestCase):
 
     def test__initialize(self):
         # initially 0 dimensions and no hyperboxes
-        self.assertEqual(self.gfmm.n, 0)
+        self.assertIsNone(self.gfmm.n)
         self.assertEqual(self.gfmm.hboxes, 0)
         # 3 dims, 3 examples
         X_l, X_u = self.gfmm._initialize(self.X1)
@@ -327,7 +327,7 @@ class TestGFMM(TestCase):
         self.assertEqual(X_l[0, 0], 1)
         self.assertEqual(X_u[0, 0], 1)
         # 2 dims, 4 examples
-        X_l, X_u = self.gfmm._initialize(self.X2)
+        X_l, X_u = self.gfmm._initialize(self.X2, wipe=True)
         self.assertEqual(self.gfmm.V.shape, (2, 0))
         self.assertEqual(self.gfmm.W.shape, (2, 0))
         self.assertEqual(self.gfmm.n, 2)
@@ -335,7 +335,7 @@ class TestGFMM(TestCase):
         self.assertEqual(X_l[0, 0], .1)
         self.assertEqual(X_u[0, 0], .1)
         # set with different min/max values
-        X_l, X_u = self.gfmm._initialize(self.X3)
+        X_l, X_u = self.gfmm._initialize(self.X3, wipe=True)
         self.assertEqual(self.gfmm.V.shape, (2, 0))
         self.assertEqual(self.gfmm.W.shape, (2, 0))
         self.assertEqual(self.gfmm.n, 2)
