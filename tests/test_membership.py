@@ -23,3 +23,10 @@ class TestMembershipFunctions(TestCase):
         bj = f(a, a)
         expected = np.array([0.5, .58666667, 0.78, 0.5])
         np.testing.assert_array_almost_equal(bj, expected)
+
+    def test_clustering(self):
+        f = membership.Clustering(self.mock_parent, gamma=1.6)
+        a = np.array([2., 5.2, 10.2])
+        bj = f(a, a)
+        expected = np.array([0.0, .22666667, 0.56, 0.0])
+        np.testing.assert_array_almost_equal(bj, expected)

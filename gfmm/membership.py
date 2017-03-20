@@ -20,11 +20,15 @@ class FuzzyMembershipFunction:
         :param au: The max value of the h'th input vector to consider
         :return: the degree of membership for all hyperboxes has for input Ah
         """
+        # get A-W part
         dw = au.reshape(len(au), 1) - self.W
         dw = self._inner_maxmins(dw)
+        # get V-A part
         dv = self.V - al.reshape(len(al), 1)
         dv = self._inner_maxmins(dv)
+        # add these two parts together
         wv = np.add(dw, dv)
+        # reduce to vector (1/2n * sum)
         total = np.sum(wv, axis=0) * (1 / (2 * self.n))
         return total
     
@@ -53,8 +57,21 @@ class FuzzyMembershipFunction:
         return self.parent.n or self.parent.V.shape[0]
 
 
+def ramp(r, γ):
+    rγ = r * γ
+    rγ[rγ > 1] = 1
+    rγ[rγ < 0] = 0
+    return rγ
+
+
 class Clustering(FuzzyMembershipFunction):
-    pass
+
+    def degree(self, al, au):
+        dw = ramp(au.reshape(len(au), 1) - self.W, self.gamma)
+        dv = ramp(self.V - au.reshape(len(au), 1), self.gamma)
+        inner_score = 1 - dw - dv
+        total = np.sum(inner_score, axis=0) * (1 / self.n)
+        return total
 
 
 class General(FuzzyMembershipFunction):

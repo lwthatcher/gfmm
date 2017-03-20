@@ -6,7 +6,8 @@ from gfmm.evaluation import num_misclassifications
 
 class GFMM:
 
-    def __init__(self, m_func=None, gamma=1, n=None, p=None, Kn=10, theta=0.3, theta_min=0.03, phi=0.9, max_epochs=1000):
+    def __init__(self, m_func=None, gamma=1, n=None, p=None,
+                 Kn=10, theta=0.3, theta_min=0.03, phi=0.9, max_epochs=1000):
         # TODO: add argument parsing
         # membership function
         if m_func is None:
@@ -437,14 +438,13 @@ class GFMM:
         return X_l, X_u
     # endregion
 
-    # region Properties
     @property
     def U(self):
         u = np.zeros((self.m, self.p + 1))   # m*p boolean matrix
         Bi = np.where(self.B_cls)[0]    # get the indices for B_cls
         u[Bi, self.B_cls.astype(int)] = 1   # if Bj is a hyperbox for class Ci, then Uij = 1
         return u
-    # endregion
+
 
 if __name__ == "__main__":
     print("GFMM coming soon")
