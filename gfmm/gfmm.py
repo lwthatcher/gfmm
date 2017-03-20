@@ -56,7 +56,7 @@ class GFMM:
             if exp:
                 Δ, l, k = self._overlap_test(j, ď)
                 self._contraction(Δ, l, j, k)
-        return out
+        return self
         # TODO: add stopping criteria
         # TODO: add φ*ϴ update
 
