@@ -5,7 +5,7 @@ from gfmm.membership import FuzzyMembershipFunction
 
 class GFMM:
 
-    def __init__(self, m_func=None, gamma=1, n=None, p=None, Kn=10, theta=0.3, phi=0.9):
+    def __init__(self, m_func=None, gamma=1, n=None, p=None, Kn=10, theta=0.3, theta_min=0.03, phi=0.9):
         # TODO: add argument parsing
         # membership function
         if m_func is None:
@@ -14,20 +14,20 @@ class GFMM:
         # number of dimensions
         self.n = n
         # number of hyperboxes
-        self.hboxes = 0
+        self.m = 0
         # classes of hyperboxes
         self.B_cls = np.array([])
         self.V = None
         self.W = None
         # max size of hyperboxes
         self.ϴ = theta
-        # speed of decrease of ϴ
+        self.ϴ_min = theta_min
+        # speed of decrease of ϴ (should be between 0 and 1)
         self.φ = phi
         # K-nearest neighbors to retrieve for expansion
         self.Kn = Kn
         # number of output classifications
         self.p = p
-        # TODO: add variables:, ϴ_min
 
     # region Public Methods
     def fit(self, X, Y=None, wipe=False):
@@ -102,7 +102,7 @@ class GFMM:
             exp: boolean
                 True if expansion occurred, False otherwise.
         """
-        if self.hboxes == 0:
+        if self.m == 0:
             ď = self._add_hyperbox(xl, xu, d)
             return -1, ď, False
         degree = self.m_func(xl, xu)
@@ -233,7 +233,7 @@ class GFMM:
             self.n = X.shape[1]
         # if wipe is set, set # of hyperboxes to zero
         if wipe:
-            self.hboxes = 0
+            self.m = 0
             self.B_cls = np.array([])
         # initialize or reset hyperbox matrices
         if wipe or self.V is None:
@@ -275,13 +275,13 @@ class GFMM:
         :return: The assigned classification
         """
         # add column to V
-        dV = np.zeros((self.n, self.hboxes + 1))
+        dV = np.zeros((self.n, self.m + 1))
         dV[:, :-1] = self.V
         if xl is not None:
             dV[:, -1] = xl
         self.V = dV
         # add column to W
-        dW = np.zeros((self.n, self.hboxes + 1))
+        dW = np.zeros((self.n, self.m + 1))
         dW[:, :-1] = self.W
         if xu is not None:
             dW[:, -1] = xu
@@ -290,7 +290,7 @@ class GFMM:
         # TODO: add clustering support, where if d==0, B_cls[-1] = p+1
         self.B_cls = np.append(self.B_cls, cls)
         # increment number-of-hyperboxes counter
-        self.hboxes += 1
+        self.m += 1
         # return classification
         return cls
 
@@ -428,7 +428,7 @@ class GFMM:
     # region Properties
     @property
     def U(self):
-        u = np.zeros((self.hboxes, self.p+1))   # m*p boolean matrix
+        u = np.zeros((self.m, self.p + 1))   # m*p boolean matrix
         Bi = np.where(self.B_cls)[0]    # get the indices for B_cls
         u[Bi, self.B_cls.astype(int)] = 1   # if Bj is a hyperbox for class Ci, then Uij = 1
         return u

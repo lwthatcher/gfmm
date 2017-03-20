@@ -45,7 +45,7 @@ class TestGFMM(TestCase):
                                        [.5, .4, .7, .53]])
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
-                self.gfmm.hboxes = 3
+                self.gfmm.m = 3
                 self.gfmm.p = 2
                 self.gfmm.V = np.copy(self.Va)
                 self.gfmm.W = np.copy(self.Wa)
@@ -68,7 +68,7 @@ class TestGFMM(TestCase):
                 # some default gfmm values
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
-                self.gfmm.hboxes = 2
+                self.gfmm.m = 2
                 self.gfmm.p = 2
                 self.gfmm.ϴ = .4
                 self.gfmm.B_cls = self.B_cls
@@ -172,7 +172,7 @@ class TestGFMM(TestCase):
                 self.gfmm = GFMM()
                 self.gfmm.n = 2
                 self.gfmm.p = 3
-                self.gfmm.hboxes = 7
+                self.gfmm.m = 7
                 self.gfmm.B_cls = self.B_cls
                 self.gfmm.V = self.V
                 self.gfmm.W = self.W
@@ -186,7 +186,7 @@ class TestGFMM(TestCase):
         gfmm.fit(ex.X, ex.d)
         self.assertEqual(gfmm.V.shape, (2, 2))
         self.assertEqual(gfmm.W.shape, (2, 2))
-        self.assertEqual(gfmm.hboxes, 2)
+        self.assertEqual(gfmm.m, 2)
         np.testing.assert_array_equal(gfmm.V, ex.Ve)
         np.testing.assert_array_equal(gfmm.W, ex.We)
 
@@ -206,19 +206,19 @@ class TestGFMM(TestCase):
         self.gfmm.ϴ = .4
         # first input
         self.gfmm._expansion(self.X2[0, :], self.X2[0, :], self.d2[0])
-        self.assertEqual(self.gfmm.hboxes, 1)
+        self.assertEqual(self.gfmm.m, 1)
         self.assertEqual(self.gfmm.V.shape, (2, 1))
         np.testing.assert_array_equal(self.gfmm.V, self.gfmm.W)
         np.testing.assert_array_equal(self.gfmm.V, np.array([[.1], [.1]]))
         # second input
         self.gfmm._expansion(self.X2[1, :], self.X2[1, :], self.d2[1])
-        self.assertEqual(self.gfmm.hboxes, 2)
+        self.assertEqual(self.gfmm.m, 2)
         self.assertEqual(self.gfmm.V.shape, (2, 2))
         np.testing.assert_array_equal(self.gfmm.V, np.array([[.1, .7], [.1, .7]]))
         np.testing.assert_array_equal(self.gfmm.W, np.array([[.1, .7], [.1, .7]]))
         # third input
         self.gfmm._expansion(self.X2[2, :], self.X2[2, :], self.d2[2])
-        self.assertEqual(self.gfmm.hboxes, 2)
+        self.assertEqual(self.gfmm.m, 2)
         self.assertEqual(self.gfmm.V.shape, (2, 2))
         np.testing.assert_array_equal(self.gfmm.V, np.array([[.1, .7], [.1, .7]]))
         np.testing.assert_array_equal(self.gfmm.W, np.array([[.5, .7], [.5, .7]]))
@@ -228,7 +228,7 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         s.gfmm.Kn = 1
         s.gfmm._expansion(s.a1, s.a1, 1)
-        self.assertEqual(s.gfmm.hboxes, 4)
+        self.assertEqual(s.gfmm.m, 4)
         self.assertEqual(s.gfmm.V.shape, (2, 4))
         np.testing.assert_array_equal(s.gfmm.V, s.Vb_k1)
         np.testing.assert_array_equal(s.gfmm.W, s.Wb_k1)
@@ -236,7 +236,7 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         s.gfmm.Kn = 3
         s.gfmm._expansion(s.a1, s.a1, 1)
-        self.assertEqual(s.gfmm.hboxes, 3)
+        self.assertEqual(s.gfmm.m, 3)
         self.assertEqual(s.gfmm.V.shape, (2, 3))
         np.testing.assert_array_equal(s.gfmm.V, s.Vb)
         np.testing.assert_array_equal(s.gfmm.W, s.Wb)
@@ -244,7 +244,7 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         s.gfmm.Kn = 10
         s.gfmm._expansion(s.a1, s.a1, 1)
-        self.assertEqual(s.gfmm.hboxes, 3)
+        self.assertEqual(s.gfmm.m, 3)
         self.assertEqual(s.gfmm.V.shape, (2, 3))
         np.testing.assert_array_equal(s.gfmm.V, s.Vb)
         np.testing.assert_array_equal(s.gfmm.W, s.Wb)
@@ -254,7 +254,7 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         a0 = np.array([.3, .3])
         j, d, exp = s.gfmm._expansion(a0, a0, 1)
-        self.assertEqual(s.gfmm.hboxes, 3)
+        self.assertEqual(s.gfmm.m, 3)
         self.assertEqual(j, 0)
         self.assertEqual(d, 1)
         self.assertEqual(exp, False)
@@ -264,7 +264,7 @@ class TestGFMM(TestCase):
         s = self.CASE_STUDY_I
         a0 = np.array([.3, .3])
         j, d, exp = s.gfmm._expansion(a0, a0, 0)
-        self.assertEqual(s.gfmm.hboxes, 3)
+        self.assertEqual(s.gfmm.m, 3)
         self.assertEqual(s.gfmm.V.shape, (2, 3))
         np.testing.assert_array_equal(s.gfmm.V, s.Va)
         np.testing.assert_array_equal(s.gfmm.W, s.Wa)
@@ -296,7 +296,7 @@ class TestGFMM(TestCase):
         gfmm.V = ex.V[:, :-1]
         gfmm.W = ex.W[:, :-1]
         gfmm.B_cls = ex.B_cls[:-1]
-        gfmm.hboxes = 6
+        gfmm.m = 6
         # basic tests to make sure we have the right setup
         self.assertEqual(gfmm.V.shape, (2, 6))
         self.assertEqual(len(gfmm.B_cls), 6)
@@ -352,13 +352,13 @@ class TestGFMM(TestCase):
     def test__initialize(self):
         # initially 0 dimensions and no hyperboxes
         self.assertIsNone(self.gfmm.n)
-        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.m, 0)
         # 3 dims, 3 examples
         X_l, X_u = self.gfmm._initialize(self.X1)
         self.assertEqual(self.gfmm.V.shape, (3, 0))
         self.assertEqual(self.gfmm.W.shape, (3, 0))
         self.assertEqual(self.gfmm.n, 3)
-        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.m, 0)
         self.assertEqual(X_l[0, 0], 1)
         self.assertEqual(X_u[0, 0], 1)
         # 2 dims, 4 examples
@@ -366,7 +366,7 @@ class TestGFMM(TestCase):
         self.assertEqual(self.gfmm.V.shape, (2, 0))
         self.assertEqual(self.gfmm.W.shape, (2, 0))
         self.assertEqual(self.gfmm.n, 2)
-        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.m, 0)
         self.assertEqual(X_l[0, 0], .1)
         self.assertEqual(X_u[0, 0], .1)
         # set with different min/max values
@@ -374,7 +374,7 @@ class TestGFMM(TestCase):
         self.assertEqual(self.gfmm.V.shape, (2, 0))
         self.assertEqual(self.gfmm.W.shape, (2, 0))
         self.assertEqual(self.gfmm.n, 2)
-        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.m, 0)
         self.assertEqual(X_l[0, 0], .1)
         self.assertEqual(X_u[0, 0], .15)
     # endregion
@@ -383,13 +383,13 @@ class TestGFMM(TestCase):
     def test__add_hyperbox(self):
         # initially none
         self.gfmm._initialize(self.X2)
-        self.assertEqual(self.gfmm.hboxes, 0)
+        self.assertEqual(self.gfmm.m, 0)
         self.assertEqual(len(self.gfmm.B_cls), 0)
         # 1 hyperbox
         xl = np.array([.1, .1])
         xu = np.array([.15, .15])
         self.gfmm._add_hyperbox(xl, xu, 1)
-        self.assertEqual(self.gfmm.hboxes, 1)
+        self.assertEqual(self.gfmm.m, 1)
         self.assertEqual(self.gfmm.V[0, 0], .1)
         self.assertEqual(self.gfmm.W[0, 0], .15)
         self.assertEqual(self.gfmm.V.shape, (2, 1))
@@ -399,7 +399,7 @@ class TestGFMM(TestCase):
         xl = np.array([.7, .7])
         xu = np.array([.75, .75])
         self.gfmm._add_hyperbox(xl, xu, 2)
-        self.assertEqual(self.gfmm.hboxes, 2)
+        self.assertEqual(self.gfmm.m, 2)
         self.assertEqual(self.gfmm.V[0, 1], .7)
         self.assertEqual(self.gfmm.V.shape, (2, 2))
         self.assertEqual(len(self.gfmm.B_cls), 2)
