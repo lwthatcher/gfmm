@@ -85,4 +85,4 @@ class General(FuzzyMembershipFunction):
     def degree(self, al, au):
         dw = 1 - ramp(au.reshape(len(au), 1) - self.W, self.gamma)
         dv = 1 - ramp(self.V - au.reshape(len(au), 1), self.gamma)
-        return None
+        return np.min(np.min([dw, dv], axis=0), axis=0)

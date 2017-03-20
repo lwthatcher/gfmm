@@ -38,3 +38,22 @@ class TestMembershipFunctions(TestCase):
         bj = f(a, a)
         expected = np.array([0.0, .22666667, 0.56, 0.0])
         np.testing.assert_array_almost_equal(bj, expected)
+
+    def test_general(self):
+        # mock
+        mock = GFMM()
+        mock.V = np.array([[.2], [.2]])
+        mock.W = np.array([[.3], [.4]])
+        # membership function
+        f = membership.General(mock, 4)
+        # examples
+        a0 = np.array([[.25], [.3]])
+        a1 = np.array([[.5], [.6]])
+        a2 = np.array([[.4], [.5]])
+        # tests
+        b0 = f(a0, a0)
+        b1 = f(a1, a1)
+        b2 = f(a2, a2)
+        np.testing.assert_array_almost_equal(b0, np.array([1.]))
+        np.testing.assert_array_almost_equal(b1, np.array([.2]))
+        np.testing.assert_array_almost_equal(b2, np.array([.6]))
