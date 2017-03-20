@@ -1,17 +1,23 @@
 from gfmm import GFMM
 from sklearn.datasets import load_iris
+from sklearn.preprocessing import normalize
 import numpy as np
 
 
 def run_iris():
+    print("loading IRIS data set")
     iris = load_iris()
-    print("loaded IRIS data set")
+
+    print("normalizing data")
     data = iris.data
-    target = iris.target
+    data = normalize(data, axis=0)
+
     print("relabelling target values")
+    target = iris.target
     target += 1
     target.astype(int)
-    print("shuffling data")
+
+    print("shuffling data, and dividing into Train/Test sets")
     idx = np.arange(len(target))
     np.random.shuffle(idx)
     idx_train = idx[:-20]
@@ -25,6 +31,7 @@ def run_iris():
     # print("splitting into folds")
     # Xs = np.split(X, 10)
     # Ys = np.split(Y, 10)
+
     print("creating classifier")
     gfmm = GFMM(p=3)
     gfmm.fit(X_train, Y_train)
