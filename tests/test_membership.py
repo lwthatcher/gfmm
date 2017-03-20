@@ -24,6 +24,14 @@ class TestMembershipFunctions(TestCase):
         expected = np.array([0.5, .58666667, 0.78, 0.5])
         np.testing.assert_array_almost_equal(bj, expected)
 
+    def test_classification__gamma_as_vector(self):
+        gamma = np.array([1.6, 1.6, 1.6])
+        f = membership.FuzzyMembershipFunction(self.mock_parent, gamma=gamma)
+        a = np.array([2., 5.3, 10.2])
+        bj = f(a, a)
+        expected = np.array([0.5, .58666667, 0.78, 0.5])
+        np.testing.assert_array_almost_equal(bj, expected)
+
     def test_clustering(self):
         f = membership.Clustering(self.mock_parent, gamma=1.6)
         a = np.array([2., 5.2, 10.2])

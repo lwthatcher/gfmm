@@ -7,10 +7,15 @@ class FuzzyMembershipFunction:
 
     def __init__(self, parent, gamma=1):
         """
+        :type gamma: int or array-like
         :param parent: the GFMM reference for accessing variables
-        :param gamma: sensitivity parameter
+        :param gamma: int or array-like, size=[n_dimensions]
+            sensitivity parameter
         """
         self.parent = parent
+        if not np.isscalar(gamma):
+            if len(gamma.shape) == 1:
+                gamma = gamma.reshape(len(gamma), 1)
         self.gamma = gamma
 
     def degree(self, al, au):
@@ -66,6 +71,7 @@ def ramp(r, γ):
 
 class Clustering(FuzzyMembershipFunction):
 
+    # noinspection PyTypeChecker
     def degree(self, al, au):
         dw = ramp(au.reshape(len(au), 1) - self.W, self.gamma)
         dv = ramp(self.V - au.reshape(len(au), 1), self.gamma)
@@ -75,4 +81,8 @@ class Clustering(FuzzyMembershipFunction):
 
 
 class General(FuzzyMembershipFunction):
-    pass
+
+    def degree(self, al, au):
+        dw = 1 - ramp(au.reshape(len(au), 1) - self.W, self.gamma)
+        dv = 1 - ramp(self.V - au.reshape(len(au), 1), self.gamma)
+        return None
