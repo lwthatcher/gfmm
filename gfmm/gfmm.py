@@ -430,10 +430,10 @@ class GFMM:
     def U(self):
         u = np.zeros((self.hboxes, self.p+1))   # m*p boolean matrix
         Bi = np.where(self.B_cls)[0]    # get the indices for B_cls
-        u[Bi, self.B_cls] = 1   # if Bj is a hyperbox for class Ci, then Uij = 1
+        u[Bi, self.B_cls.astype(int)] = 1   # if Bj is a hyperbox for class Ci, then Uij = 1
         return u
     # endregion
 
-    if __name__ == "__main__":
-        print("GFMM coming soon")
-        pass
+if __name__ == "__main__":
+    print("GFMM coming soon")
+    pass
