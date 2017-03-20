@@ -1,5 +1,5 @@
 import numpy as np
-from gfmm import GFMM
+import gfmm
 
 
 def cross_fold(X, Y, n, **gfmm_kwargs):
@@ -21,12 +21,17 @@ def cross_fold(X, Y, n, **gfmm_kwargs):
         Y_train = Y[idx_train]
         Y_test = Y[idx_test]
         # create new model
-        gfmm = GFMM(**gfmm_kwargs)
+        model = gfmm.GFMM(**gfmm_kwargs)
         # train
-        gfmm.fit(X_train, Y_train)
+        model.fit(X_train, Y_train)
         # compare
-        out = gfmm.predict(X_test)
+        out = model.predict(X_test)
         correct = np.where(out == Y_test)[0]
         # for now, just print results:
         accuracy = len(correct) / len(Y_test)
         print(i, accuracy)
+
+
+def num_misclassifications(y_true, y_pred):
+    wrong = np.where(y_true != y_pred)[0]
+    return len(wrong)

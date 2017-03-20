@@ -1,11 +1,12 @@
 import numpy as np
 
 from gfmm.membership import FuzzyMembershipFunction
+from gfmm.evaluation import num_misclassifications
 
 
 class GFMM:
 
-    def __init__(self, m_func=None, gamma=1, n=None, p=None, Kn=10, theta=0.3, theta_min=0.03, phi=0.9):
+    def __init__(self, m_func=None, gamma=1, n=None, p=None, Kn=10, theta=0.3, theta_min=0.03, phi=0.9, max_epochs=1000):
         # TODO: add argument parsing
         # membership function
         if m_func is None:
@@ -28,6 +29,10 @@ class GFMM:
         self.Kn = Kn
         # number of output classifications
         self.p = p
+        # max number of epochs to iterate over
+        if max_epochs is None:
+            max_epochs = np.inf
+        self.max_epochs = max_epochs
 
     # region Public Methods
     def fit(self, X, Y=None, wipe=False):
@@ -43,22 +48,29 @@ class GFMM:
             Returns the predicted output for each item in the input data.
         """
         input_length = X.shape[0]
-        # TODO: if Y is not set, default to clustering
         X_l, X_u = self._initialize(X, Y, wipe)
-        out = []
-        # TODO: add multi-epoch support
-        for h in range(input_length):
-            xl = X_l[h, :]
-            xu = X_u[h, :]
-            d = Y[h]
-            j, ď, exp = self._expansion(xl, xu, d)
-            out.append(ď)
-            if exp:
-                Δ, l, k = self._overlap_test(j, ď)
-                self._contraction(Δ, l, j, k)
+        stop = False
+        epoch = 0
+        while not stop:
+            out = []
+            for h in range(input_length):
+                xl = X_l[h, :]
+                xu = X_u[h, :]
+                d = Y[h]
+                j, ď, exp = self._expansion(xl, xu, d)
+                out.append(ď)
+                if exp:
+                    Δ, l, k = self._overlap_test(j, ď)
+                    self._contraction(Δ, l, j, k)
+            # update max hyperbox size
+            self.ϴ *= self.φ
+            # check stopping criteria
+            out = np.array(out)
+            misclassified = num_misclassifications(Y, out)
+            if misclassified == 0 or self.ϴ <= self.ϴ_min or epoch >= self.max_epochs:
+                stop = True
+            epoch += 1
         return self
-        # TODO: add stopping criteria
-        # TODO: add φ*ϴ update
 
     def predict(self, X):
         """
