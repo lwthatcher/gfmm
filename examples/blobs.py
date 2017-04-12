@@ -8,7 +8,8 @@ from gfmm.membership import get_membership_function
 def run_blobs(m_func, gamma, Kn, theta, percent_labelled):
     train_x, train_y, val_x, val_y, test_x, test_y = _get_sets()
     train_y = _unlabel(train_y, percent_labelled)
-    model = GFMM(m_func=m_func, gamma=gamma, n=2, p=3, Kn=Kn, theta=theta)
+    _m = get_membership_function(m_func)
+    model = GFMM(m_func=_m, gamma=gamma, n=2, p=3, Kn=Kn, theta=theta, validation_set=(val_x, val_y))
     # train
     model.fit(train_x, train_y)
     # test
@@ -64,7 +65,7 @@ def _load_data_file(file):
 
 def _details(model, accuracy, **kwargs):
     result = {'accuracy': accuracy, 'V': model.V, 'W': model.W, 'hyperboxes': model.B_cls,
-              'num_hyperboxes': len(model.B_cls), 'epochs': model._epoch, 'params': kwargs}
+              'num_hyperboxes': model.m, 'epochs': model._epoch, 'params': kwargs}
     return result
 
 
@@ -79,5 +80,4 @@ if __name__ == "__main__":
                         help="the percentage of the training set to set as labelled")
     args = parser.parse_args()
     # run the test
-    _m = get_membership_function(args.membership_func)
-    run_blobs(_m, args.gamma, args.Kn, args.theta, args.percent_labelled)
+    run_blobs(args.membership_func, args.gamma, args.Kn, args.theta, args.percent_labelled)

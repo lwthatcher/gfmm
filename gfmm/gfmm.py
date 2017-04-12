@@ -7,7 +7,7 @@ from gfmm.evaluation import num_misclassifications
 class GFMM:
 
     def __init__(self, m_func=None, gamma=1, n=None, p=None,
-                 Kn=10, theta=0.3, theta_min=None, phi=0.9, max_epochs=1000):
+                 Kn=10, theta=0.3, theta_min=None, phi=0.9, max_epochs=1000, validation_set=None):
         # TODO: add argument parsing
         # membership function
         if m_func is None:
@@ -37,6 +37,12 @@ class GFMM:
             max_epochs = np.inf
         self.max_epochs = max_epochs
         self._epoch = 0
+        # validation set
+        self._validate = False
+        if validation_set is not None:
+            self._val_x = validation_set[0]
+            self._val_y = validation_set[1]
+            self._validate = True
 
     # region Public Methods
     def fit(self, X, Y=None, wipe=False):
@@ -69,8 +75,14 @@ class GFMM:
             # update max hyperbox size
             self.ϴ *= self.φ
             # check stopping criteria
-            out = np.array(out)
-            misclassified = num_misclassifications(Y, out)
+            if self._validate:
+                predicted = self.predict(self._val_x)
+                misclassified = num_misclassifications(self._val_y, predicted)
+                print('epoch ' + str(self._epoch) + ":", misclassified, "misclassified")
+                if misclassified == 0:
+                    stop = True
+            # out = np.array(out)
+            # misclassified = num_misclassifications(Y, out)
             if self.ϴ <= self.ϴ_min or self._epoch >= self.max_epochs:
                 stop = True
             self._epoch += 1
