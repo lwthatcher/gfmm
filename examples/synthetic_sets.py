@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import numpy as np
 from gfmm import GFMM
 from gfmm.membership import get_membership_function
@@ -9,7 +10,9 @@ def run_blobs(dataset, m_func, gamma, Kn, theta, percent_labelled):
     train_x, train_y, val_x, val_y, test_x, test_y = _get_sets(dataset)
     train_y = _unlabel(train_y, percent_labelled)
     _m = get_membership_function(m_func)
-    model = GFMM(m_func=_m, gamma=gamma, n=2, p=3, Kn=Kn, theta=theta, validation_set=(val_x, val_y))
+    f_name = _file_name(dataset, m_func, gamma, Kn, theta, percent_labelled)
+    print("file name:", f_name)
+    model = GFMM(m_func=_m, gamma=gamma, Kn=Kn, theta=theta, validation_set=(val_x, val_y), patience=4)
     # train
     model.fit(train_x, train_y)
     # test
@@ -19,7 +22,10 @@ def run_blobs(dataset, m_func, gamma, Kn, theta, percent_labelled):
     # get details
     kwargs = {'m_func':m_func, 'gamma': gamma, 'Kn': Kn, 'theta': theta, 'percent_labelled': percent_labelled}
     d = _details(model, accuracy, **kwargs)
-    print(d)
+    _save_results(d, f_name)
+    print("accuracy:", d['accuracy'])
+    print("# boxes:", d['num_hyperboxes'])
+    print("params:", d['params'])
 
 
 def _unlabel(lbls, percent_labelled):
@@ -58,11 +64,35 @@ def _get_set_info(dataset):
         path = './hacks/synthetic_sets/circles/circles_'
         n = 10
         i = 6
+    elif dataset == "moons":
+        path = './hacks/synthetic_sets/moons/moons_'
+        n = 10
+        i = 6
+    elif dataset == "blobs_4D":
+        path = './hacks/synthetic_sets/blobs_4D/blobs_'
+        n = 10
+        i = 6
     else:  # if dataset == "blobs_2D":
         path = './hacks/synthetic_sets/blobs_2D/blobs_'
         n = 5
         i = 2
     return path, n, i
+
+
+def _save_results(details, name):
+    path = "/local/lthatch1/" + name
+    print('saving results to', path)
+    with open(path, 'w') as f:
+        json.dump(details, f)
+
+
+def _file_name(dataset, m_func, gamma, Kn, theta, percent_labelled):
+    result = dataset + "_"
+    result += m_func[0] + "_g" + str(int(gamma)) + "_k" + str(Kn)
+    result += "_t" + str(int(theta*100)) + "_p" + str(int(percent_labelled*100))
+    result += ".json"
+    return result
+
 
 def _load_data_file(file):
     features = []
@@ -76,14 +106,14 @@ def _load_data_file(file):
 
 
 def _details(model, accuracy, **kwargs):
-    result = {'accuracy': accuracy, 'V': model.V, 'W': model.W, 'hyperboxes': model.B_cls,
+    result = {'accuracy': accuracy, 'V': model.V.tolist(), 'W': model.W.tolist(), 'hyperboxes': model.B_cls.tolist(),
               'num_hyperboxes': model.m, 'epochs': model._epoch, 'params': kwargs}
     return result
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_set', '-D', default='blobs_2D', choices=['blobs_2D', 'blobs_4D', 'circles'],
+    parser.add_argument('--data_set', '-D', default='blobs_2D', choices=['blobs_2D', 'blobs_4D', 'circles', 'moons'],
                         help="membership function")
     parser.add_argument('--membership_func', '-m', default='standard', choices=['standard', 'cluster', 'general'],
                         help="membership function")
