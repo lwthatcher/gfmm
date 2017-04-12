@@ -8,7 +8,7 @@ from gfmm.membership import get_membership_function
 def run_blobs(m_func, gamma, Kn, theta, percent_labelled):
     train_x, train_y, val_x, val_y, test_x, test_y = _get_sets()
     train_y = _unlabel(train_y, percent_labelled)
-    model = GFMM(m_func=m_func, gamma=gamma, n=4, p=6, Kn=Kn, theta=theta)
+    model = GFMM(m_func=m_func, gamma=gamma, n=2, p=3, Kn=Kn, theta=theta)
     # train
     model.fit(train_x, train_y)
     # test

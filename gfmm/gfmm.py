@@ -71,7 +71,7 @@ class GFMM:
             # check stopping criteria
             out = np.array(out)
             misclassified = num_misclassifications(Y, out)
-            if misclassified == 0 or self.ϴ <= self.ϴ_min or self._epoch >= self.max_epochs:
+            if self.ϴ <= self.ϴ_min or self._epoch >= self.max_epochs:
                 stop = True
             self._epoch += 1
         return self
