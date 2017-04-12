@@ -7,7 +7,7 @@ from gfmm.evaluation import num_misclassifications
 class GFMM:
 
     def __init__(self, m_func=None, gamma=1, n=None, p=None,
-                 Kn=10, theta=0.3, theta_min=None, phi=0.9, max_epochs=1000, validation_set=None):
+                 Kn=10, theta=0.3, theta_min=None, phi=0.9, max_epochs=1000, validation_set=None, patience=2):
         # TODO: add argument parsing
         # membership function
         if m_func is None:
@@ -43,6 +43,8 @@ class GFMM:
             self._val_x = validation_set[0]
             self._val_y = validation_set[1]
             self._validate = True
+            self._val_length = len(validation_set[1])
+        self._patience = patience
 
     # region Public Methods
     def fit(self, X, Y=None, wipe=False):
@@ -77,10 +79,13 @@ class GFMM:
             # check stopping criteria
             if self._validate:
                 predicted = self.predict(self._val_x)
-                misclassified = num_misclassifications(self._val_y, predicted)
-                print('epoch ' + str(self._epoch) + ":", misclassified, "misclassified")
-                if misclassified == 0:
-                    stop = True
+                correct = np.where(predicted == self._val_y)[0]
+                accuracy = len(correct) / self._val_length
+                print('epoch ' + str(self._epoch) + ":", accuracy, "boxes:", self.m, "theta:", self.ϴ)
+                # misclassified = num_misclassifications(self._val_y, predicted)
+                # print('epoch ' + str(self._epoch) + ":", misclassified, "misclassified")
+                # if misclassified == 0:
+                #     stop = True
             # out = np.array(out)
             # misclassified = num_misclassifications(Y, out)
             if self.ϴ <= self.ϴ_min or self._epoch >= self.max_epochs:
@@ -362,6 +367,9 @@ class GFMM:
         dim_sizes = W_max - V_min
         result = np.all(dim_sizes <= self.ϴ, 0)
         return idx[result]
+
+    def _store_bssf(self):
+        pass
     # endregion
 
     # region Static Methods
@@ -460,6 +468,13 @@ class GFMM:
         u[Bi, self.B_cls.astype(int)] = 1   # if Bj is a hyperbox for class Ci, then Uij = 1
         return u
 
+
+class BSSF:
+    def __init__(self, V, W, B_cls, accuracy):
+        self.V = V.copy()
+        self.W = W.copy()
+        self.B_cls = B_cls.copy()
+        self.accuracy = accuracy
 
 if __name__ == "__main__":
     print("GFMM coming soon")
