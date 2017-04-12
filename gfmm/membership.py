@@ -86,3 +86,8 @@ class General(FuzzyMembershipFunction):
         dw = 1 - ramp(au.reshape(len(au), 1) - self.W, self.gamma)
         dv = 1 - ramp(self.V - au.reshape(len(au), 1), self.gamma)
         return np.min(np.min([dw, dv], axis=0), axis=0)
+
+
+def get_membership_function(name):
+    if name == "standard":
+        return FuzzyMembershipFunction

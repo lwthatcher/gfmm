@@ -7,7 +7,7 @@ from gfmm.evaluation import num_misclassifications
 class GFMM:
 
     def __init__(self, m_func=None, gamma=1, n=None, p=None,
-                 Kn=10, theta=0.3, theta_min=0.03, phi=0.9, max_epochs=1000):
+                 Kn=10, theta=0.3, theta_min=None, phi=0.9, max_epochs=1000):
         # TODO: add argument parsing
         # membership function
         if m_func is None:
@@ -23,6 +23,8 @@ class GFMM:
         self.W = None
         # max size of hyperboxes
         self.ϴ = theta
+        if theta_min is None:
+            theta_min = theta * .1
         self.ϴ_min = theta_min
         # speed of decrease of ϴ (should be between 0 and 1)
         self.φ = phi
@@ -34,6 +36,7 @@ class GFMM:
         if max_epochs is None:
             max_epochs = np.inf
         self.max_epochs = max_epochs
+        self._epoch = 0
 
     # region Public Methods
     def fit(self, X, Y=None, wipe=False):
@@ -51,7 +54,7 @@ class GFMM:
         input_length = X.shape[0]
         X_l, X_u = self._initialize(X, Y, wipe)
         stop = False
-        epoch = 0
+        self._epoch = 0
         while not stop:
             out = []
             for h in range(input_length):
@@ -68,9 +71,9 @@ class GFMM:
             # check stopping criteria
             out = np.array(out)
             misclassified = num_misclassifications(Y, out)
-            if misclassified == 0 or self.ϴ <= self.ϴ_min or epoch >= self.max_epochs:
+            if misclassified == 0 or self.ϴ <= self.ϴ_min or self._epoch >= self.max_epochs:
                 stop = True
-            epoch += 1
+            self._epoch += 1
         return self
 
     def predict(self, X):
