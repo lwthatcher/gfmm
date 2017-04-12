@@ -5,8 +5,8 @@ from gfmm import GFMM
 from gfmm.membership import get_membership_function
 
 
-def run_blobs(m_func, gamma, Kn, theta, percent_labelled):
-    train_x, train_y, val_x, val_y, test_x, test_y = _get_sets()
+def run_blobs(dataset, m_func, gamma, Kn, theta, percent_labelled):
+    train_x, train_y, val_x, val_y, test_x, test_y = _get_sets(dataset)
     train_y = _unlabel(train_y, percent_labelled)
     _m = get_membership_function(m_func)
     model = GFMM(m_func=_m, gamma=gamma, n=2, p=3, Kn=Kn, theta=theta, validation_set=(val_x, val_y))
@@ -31,26 +31,38 @@ def _unlabel(lbls, percent_labelled):
     return lbls
 
 
-def _get_sets():
-    X, Y = _get_blob_sets()
-    train_x = np.vstack(X[0:2])
-    train_y = np.hstack(Y[0:2])
-    val_x = X[2]
-    val_y = Y[2]
-    test_x = np.vstack(X[3:])
-    test_y = np.hstack(Y[3:])
+def _get_sets(dataset):
+    path, n, i = _get_set_info(dataset)
+    X, Y = _get_dataset_sets(path, n)
+    train_x = np.vstack(X[:i])
+    train_y = np.hstack(Y[:i])
+    val_x = X[i]
+    val_y = Y[i]
+    test_x = np.vstack(X[i+1:])
+    test_y = np.hstack(Y[i+1:])
     return train_x, train_y, val_x, val_y, test_x, test_y
 
 
-def _get_blob_sets():
+def _get_dataset_sets(path, n):
     X = []
     Y = []
-    for i in range(5):
-        x, y = _load_data_file("blobs_" + str(i) + ".txt")
+    for i in range(n):
+        x, y = _load_data_file(path + str(i) + ".txt")
         X.append(x)
         Y.append(y)
     return X, Y
 
+
+def _get_set_info(dataset):
+    if dataset == "circles":
+        path = './hacks/synthetic_sets/circles/circles_'
+        n = 10
+        i = 6
+    else:  # if dataset == "blobs_2D":
+        path = './hacks/synthetic_sets/blobs_2D/blobs_'
+        n = 5
+        i = 2
+    return path, n, i
 
 def _load_data_file(file):
     features = []
@@ -71,6 +83,8 @@ def _details(model, accuracy, **kwargs):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('--data_set', '-D', default='blobs_2D', choices=['blobs_2D', 'blobs_4D', 'circles'],
+                        help="membership function")
     parser.add_argument('--membership_func', '-m', default='standard', choices=['standard', 'cluster', 'general'],
                         help="membership function")
     parser.add_argument('--gamma', '-g', default=4., type=float, help="the gamma value to use")
@@ -80,4 +94,4 @@ if __name__ == "__main__":
                         help="the percentage of the training set to set as labelled")
     args = parser.parse_args()
     # run the test
-    run_blobs(args.membership_func, args.gamma, args.Kn, args.theta, args.percent_labelled)
+    run_blobs(args.data_set, args.membership_func, args.gamma, args.Kn, args.theta, args.percent_labelled)
