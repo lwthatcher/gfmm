@@ -21,11 +21,9 @@ def run_blobs(dataset, m_func, gamma, Kn, theta, percent_labelled):
     accuracy = len(correct) / len(test_y)
     # get details
     kwargs = {'m_func':m_func, 'gamma': gamma, 'Kn': Kn, 'theta': theta, 'percent_labelled': percent_labelled}
-    d = _details(model, accuracy, **kwargs)
+    d, d2 = _details(model, accuracy, **kwargs)
     _save_results(d, f_name)
-    print("accuracy:", d['accuracy'])
-    print("# boxes:", d['num_hyperboxes'])
-    print("params:", d['params'])
+    print(d)
 
 
 def _unlabel(lbls, percent_labelled):
@@ -106,9 +104,9 @@ def _load_data_file(file):
 
 
 def _details(model, accuracy, **kwargs):
-    result = {'accuracy': accuracy, 'V': model.V.tolist(), 'W': model.W.tolist(), 'hyperboxes': model.B_cls.tolist(),
-              'num_hyperboxes': model.m, 'epochs': model._epoch, 'params': kwargs}
-    return result
+    r1 = {'accuracy': accuracy, 'num_hyperboxes': model.m, 'epochs': model._epoch, 'params': kwargs}
+    r2 = {'V': model.V.tolist(), 'W': model.W.tolist(), 'hyperboxes': model.B_cls.tolist()}
+    return r1, r2
 
 
 if __name__ == "__main__":
