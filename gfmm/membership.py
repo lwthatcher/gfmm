@@ -91,3 +91,7 @@ class General(FuzzyMembershipFunction):
 def get_membership_function(name):
     if name == "standard":
         return FuzzyMembershipFunction
+    elif name == "cluster":
+        return Clustering
+    elif name == "general":
+        return General

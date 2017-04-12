@@ -444,7 +444,7 @@ class GFMM:
     @property
     def U(self):
         u = np.zeros((self.m, self.p + 1))   # m*p boolean matrix
-        Bi = np.where(self.B_cls)[0]    # get the indices for B_cls
+        Bi = np.arange(len(self.B_cls))   # get the indices for B_cls
         u[Bi, self.B_cls.astype(int)] = 1   # if Bj is a hyperbox for class Ci, then Uij = 1
         return u
 
