@@ -44,7 +44,7 @@ class GFMM:
             self._val_y = validation_set[1]
             self._validate = True
             self._val_length = len(validation_set[1])
-        self._patience = patience
+            self.patience = patience
 
     # region Public Methods
     def fit(self, X, Y=None, wipe=False):
@@ -63,6 +63,7 @@ class GFMM:
         X_l, X_u = self._initialize(X, Y, wipe)
         stop = False
         self._epoch = 0
+        _p = 0
         while not stop:
             out = []
             for h in range(input_length):
@@ -76,18 +77,21 @@ class GFMM:
                     self._contraction(Δ, l, j, k)
             # update max hyperbox size
             self.ϴ *= self.φ
-            # check stopping criteria
+            # validation set
             if self._validate:
                 predicted = self.predict(self._val_x)
                 correct = np.where(predicted == self._val_y)[0]
                 accuracy = len(correct) / self._val_length
+                if accuracy > self.bssf.accuracy:
+                    _p = 0
+                    self._store_bssf(accuracy)
+                else:
+                    _p += 1
                 print('epoch ' + str(self._epoch) + ":", accuracy, "boxes:", self.m, "theta:", self.ϴ)
-                # misclassified = num_misclassifications(self._val_y, predicted)
-                # print('epoch ' + str(self._epoch) + ":", misclassified, "misclassified")
-                # if misclassified == 0:
-                #     stop = True
-            # out = np.array(out)
-            # misclassified = num_misclassifications(Y, out)
+                if _p >= self.patience:
+                    stop = True
+                    self._revert_to_bssf()
+            # check stopping criteria
             if self.ϴ <= self.ϴ_min or self._epoch >= self.max_epochs:
                 stop = True
             self._epoch += 1
@@ -272,6 +276,9 @@ class GFMM:
         if wipe or self.V is None:
             self.V = np.zeros((self.n, 0))
             self.W = np.zeros((self.n, 0))
+        # initial bssf
+        if self._validate:
+            self._store_bssf(0)
         return X_l, X_u
     # endregion
 
@@ -368,8 +375,15 @@ class GFMM:
         result = np.all(dim_sizes <= self.ϴ, 0)
         return idx[result]
 
-    def _store_bssf(self):
-        pass
+    def _store_bssf(self, score):
+        self.bssf = BSSF(self.V, self.W, self.B_cls, score)
+
+    def _revert_to_bssf(self):
+        self.V = self.bssf.V
+        self.W = self.bssf.W
+        self.B_cls = self.bssf.B_cls
+        self.m = len(self.bssf.B_cls)
+        print("reverted to BSSF with score:", self.bssf.accuracy)
     # endregion
 
     # region Static Methods
